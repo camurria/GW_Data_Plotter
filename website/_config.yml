@@ -28,7 +28,8 @@ baseurl: "" # the subpath of your site, e.g. /blog
 url: "" # the base hostname & protocol for your site, e.g. http://example.com
 
 aux_links:
-  GW Data Plotter Repository: https://github.com/camurria/GW_Data_Plotter/
+  # GW Data Plotter Repository: https://github.com/camurria/GW_Data_Plotter/
+  Download GW Data Plotter: https://zenodo.org/records/13778828
 
 twitter_username: jekyllrb
 github_username:  jekyll
