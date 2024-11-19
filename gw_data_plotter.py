@@ -219,6 +219,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.pushButton_2.clicked.connect(self.plot_strain)
         self.pushButton_4.clicked.connect(self.plot_Qscan)
 
+        # PI: Hide the progress bar by default
+        self.Download_progressBar.setVisible(False)
+
         # PI: Connect the help button of each different tab to the show_help method
         self.helpButton1.clicked.connect(self.show_help)
         self.helpButton2.clicked.connect(self.show_help)
@@ -827,7 +830,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                         
                 self.write_log("- Wait, the download is ongoing...\n")
-            
+
+                #PI: Show the progress bar
+                self.Download_progressBar.setVisible(True)
             
                 worker = Worker(self.fetch_open_data) # Any other args, kwargs are passed to the run function
                 worker.signals.result.connect(self.print_output)
@@ -1254,10 +1259,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         
                 
 ############################
-
-    def progress_fn(self, n):
+# PI: trial to incorporate the download progress bar
+    def progress_fn(self, value):
         #this needs to be improved or eliminated
-        print("%d%% done" % n)
+        self.Download_progressBar.setValue(value)
+        print("%d%% done" % value)
 
 
 ############################
@@ -1422,7 +1428,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     output+=e+" at GPS time: "+str(event_gps(e))+"\n"
                     
         try:
-            self.data = TimeSeries.fetch_open_data(self.det, self.GPS_start,self.GPS_end)
+            self.data = TimeSeries.fetch_open_data(self.det, self.GPS_start,self.GPS_end, verbose=True)
         except ValueError as ve:
             error = str(ve)
             error = error.replace("H1", "LIGO-Hanford")

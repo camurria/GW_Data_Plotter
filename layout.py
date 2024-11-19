@@ -382,6 +382,10 @@ class Ui_MainWindow(object):
         self.textBrowser.setFont(font)
         self.textBrowser.setObjectName("textBrowser")
         self.verticalLayout.addWidget(self.textBrowser)
+        self.Download_progressBar = QtWidgets.QProgressBar(parent=self.tab)
+        self.Download_progressBar.setProperty("value", 0)
+        self.Download_progressBar.setObjectName("Download_progressBar")
+        self.verticalLayout.addWidget(self.Download_progressBar)
         self.horizontalLayout.addLayout(self.verticalLayout)
         self.horizontalLayout.setStretch(0, 1)
         self.horizontalLayout.setStretch(1, 1)
@@ -895,6 +899,7 @@ class Ui_MainWindow(object):
         self.gridLayout_7.addWidget(self.tabWidget, 1, 0, 1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusbar = QtWidgets.QStatusBar(parent=MainWindow)
+        self.statusbar.setEnabled(True)
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
 
@@ -954,6 +959,7 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "GW data plotter"))
+        MainWindow.setToolTip(_translate("MainWindow", "<html><head/><body><p><span style=\"color:#005493;font-size:15px;\">Displays download progress.</span></p></body></html>"))
         self.label_4.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" color:#005493;\">GW Data Plotter</span></p></body></html>"))
         self.helpButton1.setText(_translate("MainWindow", "Help"))
         self.label.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" color:#005493;\">Select a Detector</span></p></body></html>"))
@@ -987,6 +993,7 @@ class Ui_MainWindow(object):
         self.pushButton_7.setToolTip(_translate("MainWindow", "<html><head/><body><p><span style=\"font-size:15px;\">Saves the data in one of the supported formats (hdf5, gwf or txt).</span></p></body></html>"))
         self.pushButton_7.setText(_translate("MainWindow", "Save data"))
         self.label_30.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\">Log window</p></body></html>"))
+        self.Download_progressBar.setToolTip(_translate("MainWindow", "<html><head/><body><p><span style=\"color:#005493;font-size:15px;\">Displays download progress.</span></p></body></html>"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("MainWindow", "Get Data"))
         self.helpButton2.setText(_translate("MainWindow", "Help"))
         self.label_25.setText(_translate("MainWindow", "<html><head/><body><p><span style=\"color:#005493;\">Plot settings</span></p></body></html>"))

@@ -19,6 +19,9 @@
   <property name="windowTitle">
    <string>GW data plotter</string>
   </property>
+  <property name="toolTip">
+   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot;color:#005493;font-size:15px;&quot;&gt;Displays download progress.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <property name="font">
     <font>
@@ -1028,6 +1031,19 @@ QLabel:disabled {
                 <family>Times New Roman</family>
                 <pointsize>14</pointsize>
                </font>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QProgressBar" name="Download_progressBar">
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot;color:#005493;font-size:15px;&quot;&gt;Displays download progress.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+              <property name="maximum">
+               <number>100</number>
+              </property>
+              <property name="value">
+               <number>0</number>
               </property>
              </widget>
             </item>
@@ -2510,7 +2526,11 @@ QLabel:disabled {
     </item>
    </layout>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QStatusBar" name="statusbar">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+  </widget>
  </widget>
  <tabstops>
   <tabstop>textBrowser</tabstop>
