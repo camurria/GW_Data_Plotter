@@ -1,0 +1,3 @@
+sphinx          # our documentation generator
+furo==2024.8.6  # furo theme and version
+myst-parser     # extension to enable markdown support
