@@ -1,0 +1,63 @@
+name: "Sphinx: build HTML and deploy"
+
+on:   
+  push:
+    branches:
+      - main # Trigger the workflow only on push events to the main branch
+    paths:
+      - 'docs/**' # Trigger the workflow only when changes are made to files in the docs/ folder
+  workflow_dispatch:  # Enables manual trigger of the workflow
+
+jobs:
+  build:
+    runs-on: ubuntu-latest # Use the latest version of Ubuntu for the runner
+    permissions:
+      contents: write # Allow the runner to write to the repository
+ 
+      
+    steps:
+      # Checkout the repository to the runner
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        persist-credentials: false  # Do not persist credentials for security reasons  
+      
+
+      # Specify a Python version by using the 'setup-python' action  
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'    
+      
+
+      # Install dependencies from 'requirements.txt' file  
+      # and upgrade 'pip' to the latest version 
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip 
+        pip install -r docs/requirements.txt
+    
+
+      # Use the 'make' utility program to build the HTML documentation files  
+    - name: Build HTML
+      run: |
+        cd docs
+        make html
+      
+
+      # Upload the HTML documentation files as an artifact using the 'upload-artifact' action
+      # This allows you to download the generated files from the 'Actions' tab for checking 
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: html-docs
+        path: docs/build/html/
+      
+
+      # Use the pre-built action 'peaceiris/actions-gh-pages' to deploy the HTML documentation files to GitHub Pages  
+    - name: Deploy
+      uses: peaceiris/actions-gh-pages@v3
+      if: github.ref == 'refs/heads/main'
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: docs/build/html
