@@ -23,5 +23,5 @@ clean:
 	@$(SPHINXBUILD) -M clean "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O);
 # this line creates a 'git worktree' for the gh-pages branch in the html/ directory
 # It is useful when developing locally, it is not needed for the CI/CD pipeline
-	cd build; git worktree add -f html gh-pages
+# cd build; git worktree add -f html gh-pages
 
