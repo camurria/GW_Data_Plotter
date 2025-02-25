@@ -251,18 +251,24 @@
           <section id="get-data">
 <h1>Get Data<a class="headerlink" href="#get-data" title="Link to this heading">¶</a></h1>
 <p>The <span class="guilabel">Get Data</span> tab allows users to download publicly available GW data originally hosted on the
-<a class="reference external" href="https://gwosc.org/">GWOSC</a> website. Users can download data in one of the following ways:</p>
+<a class="reference external" href="https://gwosc.org/">GWOSC</a> website. Users can download data in three ways:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#by-time-interval-label"><span class="std std-ref">By time interval</span></a></p></li>
+<li><p><a class="reference internal" href="#by-known-gw-event-label"><span class="std std-ref">By selecting a known GW event</span></a></p></li>
+<li><p><a class="reference internal" href="#by-known-glitch-label"><span class="std std-ref">By selecting a known glitch</span></a></p></li>
+</ul>
+<p>If you are downloading the data by time interval or by selecting a known GW event, remember to select a detector first.</p>
 <a class="reference internal image-reference" href="_images/get_data_tab.png"><img alt="_images/get_data_tab.png" class="align-center" src="_images/get_data_tab.png" style="width: 100%;" />
 </a>
 <section id="by-time-interval">
-<h2>By time interval<a class="headerlink" href="#by-time-interval" title="Link to this heading">¶</a></h2>
+<span id="by-time-interval-label"></span><h2>By time interval<a class="headerlink" href="#by-time-interval" title="Link to this heading">¶</a></h2>
 <p>Under the <span class="guilabel">Select Data by time interval</span> section the user can specify a time interval by typing the starting and
 ending times in GPS format, which is the convention used by the GW community.
 In this convention, the time is calculated by counting seconds from a reference date (6th January 1980).
 To convert <a class="reference external" href="https://en.wikipedia.org/wiki/Coordinated_Universal_Time">UTC time</a> to GPS time format visit <a class="reference external" href="https://gwosc.org/gps/">this link</a>.</p>
 </section>
 <section id="by-selecting-a-known-gw-event">
-<h2>By selecting a known GW event<a class="headerlink" href="#by-selecting-a-known-gw-event" title="Link to this heading">¶</a></h2>
+<span id="by-known-gw-event-label"></span><h2>By selecting a known GW event<a class="headerlink" href="#by-selecting-a-known-gw-event" title="Link to this heading">¶</a></h2>
 <p>Under the <span class="guilabel">Select a known GW event</span> section, users can choose to download a few showcase GW events
 or type the name of a specific GW event published by the LIGO-Virgo-KAGRA (LVK) collaboration.
 To get the GPS times and names of all known detections, check <a class="reference external" href="https://gwosc.org/eventapi/">this page</a>.</p>
@@ -272,13 +278,14 @@ The starting time for the data download is calculated as <code class="code docut
 time before the merger is expected to be a negative number.</p>
 </section>
 <section id="by-selecting-a-known-glitch">
-<h2>By selecting a known glitch<a class="headerlink" href="#by-selecting-a-known-glitch" title="Link to this heading">¶</a></h2>
+<span id="by-known-glitch-label"></span><h2>By selecting a known glitch<a class="headerlink" href="#by-selecting-a-known-glitch" title="Link to this heading">¶</a></h2>
 <p>A glitch is a short-time noise artifact which can mimic a GW signal.
 Possible glitches are already identified in the LVK data.
 Under the <span class="guilabel">Select an example of a known glitch</span> section, users can select
 to download a few examples of glitches.
 A good source to get the full list of known glitches (with their GPS times of occurrence) in the first three
-observing runs is the <a class="reference external" href="https://zenodo.org/records/5649212">GravitySpy Zenodo repository</a>.</p>
+observing runs is the <a class="reference external" href="https://zenodo.org/records/5649212">GravitySpy Zenodo repository</a>.
+Note that the current examples are specific to the LIGO-Hanford detector only.</p>
 </section>
 <section id="data-handling">
 <h2>Data handling<a class="headerlink" href="#data-handling" title="Link to this heading">¶</a></h2>
@@ -298,8 +305,7 @@ The loading can read any file previously saved with the <strong>GW Data Plotter<
 <p>The whitening procedure allows data to be re-weighted according to the detector noise at each frequency,
 so it is equivalent to a sort of noise removal.
 We strongly advise using it when possible.
-To use the whitening procedure, we suggest downloading at least 2 seconds of data.
-Remember to select a detector if you are downloading the data via time interval or selecting a known GW event.</p>
+To use the whitening procedure, we suggest downloading at least 2 seconds of data.</p>
 </section>
 </section>
 
