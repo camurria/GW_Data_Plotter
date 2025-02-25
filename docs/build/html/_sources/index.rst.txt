@@ -65,9 +65,11 @@ Report an issue
 If you encounter any bugs or issues while using the app, or you would like to share your feedback please create a *New issue* on the `Issue Tracker`_. 
 
 
+Contents
+--------
+
 .. toctree::
    :maxdepth: 2
-   :caption: Contents
 
    Home <self>
    install
