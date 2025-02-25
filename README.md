@@ -6,6 +6,10 @@ The code is based on [PyQt6](https://www.riverbankcomputing.com/software/pyqt/) 
 [gwpy](https://gwpy.github.io) and [gwosc](https://pypi.org/project/gwosc/) python packages for the gravitational wave 
 related part.
 
+[![DOI](https://img.shields.io/badge/dynamic/json?url=https://zenodo.org/api/records/13778827&label=DOI&query=$.doi&color=blue)](https://doi.org/10.5281/zenodo.13778827)
+[![License: GPL-3.0-or-later](https://img.shields.io/badge/License-GPL--3.0--or--later-blue)](https://choosealicense.com/licenses/gpl-3.0/)
+
+
 ## Description of the python scripts
 This repository contains 3 python scripts:
 * `gw_data_plotter.py`: main script; to get the app just execute on a terminal `python gw_data_plotter.py`
