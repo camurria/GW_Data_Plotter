@@ -2,11 +2,19 @@ Get Data
 ========
 
 The :guilabel:`Get Data` tab allows users to download publicly available GW data originally hosted on the 
-`GWOSC <https://gwosc.org/>`_ website. Users can download data in one of the following ways:
+`GWOSC <https://gwosc.org/>`_ website. Users can download data in three ways:
+
+- :ref:`by_time_interval_label` 
+- :ref:`by_known_gw_event_label`
+- :ref:`by_known_glitch_label`
+
+If you are downloading the data by time interval or by selecting a known GW event, remember to select a detector first. 
 
 .. image:: _static/get_data_tab.png
     :width: 100%
     :align: center
+
+.. _by_time_interval_label:
 
 By time interval
 ------------------------------------
@@ -16,6 +24,7 @@ ending times in GPS format, which is the convention used by the GW community.
 In this convention, the time is calculated by counting seconds from a reference date (6th January 1980). 
 To convert `UTC time`_ to GPS time format visit `this link <https://gwosc.org/gps/>`_.
 
+.. _by_known_gw_event_label:
 
 By selecting a known GW event 
 -----------------------------
@@ -28,7 +37,9 @@ The subsection :guilabel:`Select duration of data segment` can be used to decide
 to download before and after the merger time of the event. 
 The starting time for the data download is calculated as :code:`(merger time) + (time before the merger)` so the 
 time before the merger is expected to be a negative number.
-    
+
+.. _by_known_glitch_label:
+
 By selecting a known glitch
 ---------------------------
 
@@ -38,6 +49,7 @@ Under the :guilabel:`Select an example of a known glitch` section, users can sel
 to download a few examples of glitches. 
 A good source to get the full list of known glitches (with their GPS times of occurrence) in the first three 
 observing runs is the `GravitySpy Zenodo repository`_.
+Note that the current examples are specific to the LIGO-Hanford detector only.
 
 
 Data handling
@@ -62,7 +74,6 @@ The whitening procedure allows data to be re-weighted according to the detector 
 so it is equivalent to a sort of noise removal.
 We strongly advise using it when possible.
 To use the whitening procedure, we suggest downloading at least 2 seconds of data.
-Remember to select a detector if you are downloading the data via time interval or selecting a known GW event.
 
 .. _UTC time: https://en.wikipedia.org/wiki/Coordinated_Universal_Time
 .. _GravitySpy Zenodo repository: https://zenodo.org/records/5649212
