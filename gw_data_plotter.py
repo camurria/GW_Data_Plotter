@@ -1978,6 +1978,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.catalogs = []
         for catalog in catalog_list_names:
             c = fetch_json(f"https://gwosc.org/eventapi/json/query/show?release={catalog}&lastver=true")
+            # c = fetch_json(f"https://gwosc.org/api/v2/event-versions?format=json&release={catalog}&lastver=true&include-default-parameters=true") # needs to be tested
+            # c = fetch_json(f"https://gwosc.org/api/v2/catalogs/{catalog}/events?format=json&lastver=true&include-default-parameters=true") # alternative, needs to be tested
             output += catalog
             output += "\n"
             self.catalogs.append(c)
