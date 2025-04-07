@@ -15,7 +15,13 @@ from gwosc.datasets import find_datasets, event_detectors
 from gwosc.datasets import event_gps
 from gwpy.time import from_gps
 from gwpy.timeseries import TimeSeries
-from gwosc.api import fetch_event_json, fetch_json
+
+#from gwosc.api import fetch_event_json, fetch_json
+
+# PI: use the 2nd version of the GWOSC API
+# replaced fetch_vent_json with fetch_event_version
+from gwosc.api.v2 import fetch_event_version, fetch_json, produce_fetched_objects
+
 
 
 from layout import Ui_MainWindow
