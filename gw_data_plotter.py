@@ -245,8 +245,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.event_parameters = {
             "Mass 1" : {
                 "db_name" : "mass_1_source",
-                "unit" : "M$_\odot$",
-                
+                "unit" : "M$_\odot$",       
             },
             "Mass 2" : {
                 "db_name" : "mass_2_source",
@@ -1316,6 +1315,29 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
 ############################
+# PI: method to get the value of a specific parameter from the data
+
+    def get_parameter_value(self, param_list, parameter_name):
+        """
+        Fetch the value of a specific parameter from the data.
+
+        Parameters:
+        - param_list: list of event's parameters.
+        - parameter_name: The name of the parameter to look up.
+
+        Returns:
+        - The value of the parameter, or None if not found.
+        """
+
+        for param in param_list:
+            if param['name'] == parameter_name:
+                return param['best']
+            else:
+                print (f"Parameter {parameter_name} not found in event data.")
+                return None
+
+
+############################
 # PI: This code block plots the histogram of a specified parameter for all GW events.
 # It must run only AFTER the catalogs data has been downloaded.
 
@@ -1325,12 +1347,43 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             db_name = self.event_parameters[key]['db_name']
             param = []
+            # print(db_name)
+
+
+            # PI: previous API v1 logic            
+            # for c in self.catalogs:
+            #     for e in c['events']:
+            #         value = c['events'][e][db_name]
+            #         if value: #this is to remove Nones
+            #             param.append(value)
+
+
+            # print('length of catalogs:', len(self.catalogs))
             
+            # Print all the elements of catalogs
+            # for c in self.catalogs:
+            #     print(c)
+
+
+            # PI: API v2 logic
             for c in self.catalogs:
-                for e in c['events']:
-                    value = c['events'][e][db_name]
+
+                # Convert the generator object to a list
+                all_catalog_events = list(c)
+                for event in all_catalog_events:
+
+                    # PI: THIS WORKS
+                    # for param in event['default_parameters']:
+                    #     print(f"Parameter Name: {param['name']}, Best Value: {param['best']}")
+
+
+                    # TODO: Need to fix how to get the parameter value
+                    value = self.get_parameter_value(event['default_parameters'], db_name)
+                    
+                    # print(value)
+                    
                     if value: #this is to remove Nones
-                        param.append(value)
+                        param.append(value)            
                 
 
             fig = Figure()
@@ -1983,12 +2036,28 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         
         self.catalogs = []
         for catalog in catalog_list_names:
-            c = fetch_json(f"https://gwosc.org/eventapi/json/query/show?release={catalog}&lastver=true")
-            # c = fetch_json(f"https://gwosc.org/api/v2/event-versions?format=json&release={catalog}&lastver=true&include-default-parameters=true") # needs to be tested
-            # c = fetch_json(f"https://gwosc.org/api/v2/catalogs/{catalog}/events?format=json&lastver=true&include-default-parameters=true") # alternative, needs to be tested
+            # PI: API v1 logic
+            # c = fetch_json(f"https://gwosc.org/eventapi/json/query/show?release={catalog}&lastver=true")
+            
+
+
+            # PI: API v2 logic (with 'format=json')
+            # catalogs_url = f"https://gwosc.org/api/v2/catalogs/{catalog}/events?format=json&lastver=true&include-default-parameters=true"
+
+            # Trial without 'format=json'
+            catalog_url = f"https://gwosc.org/api/v2/catalogs/{catalog}/events?lastver=true&include-default-parameters=true"    
+            
+            # Link based on 'event-versions' endpoint
+            # catalog_url = f"https://gwosc.org/api/v2/event-versions?format=json&release={catalog}&lastver=true&include-default-parameters=true"
+            
+            # Link based on 'catalogs' endpoint
+            # catalog_url = f"https://gwosc.org/api/v2/catalogs/{catalog}/events?format=json&lastver=true&include-default-parameters=true"
+            
+            catalog_events = produce_fetched_objects(catalog_url)
+
             output += catalog
             output += "\n"
-            self.catalogs.append(c)
+            self.catalogs.append(catalog_events)        
 
         progress_callback.emit(100)
         return output+"\n- Done!\n"
