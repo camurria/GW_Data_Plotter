@@ -1366,7 +1366,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     # Get the parameter value
                     value = self.get_parameter_value(event['default_parameters'], db_name)
                     if value is None:
-                        print(f"Event {event['name']} does not have the parameter '{db_name}'.")
+                        print(f"Event {event['name']} missing parameter: {db_name}")
 
                     if value: #this is to remove Nones
                         param.append(value)            
@@ -1428,11 +1428,33 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         param1 = []
         param2 = []
         
+
+        # PI: previous API v1 logic
+        # for c in self.catalogs:
+        #     for e in c['events']:
+        #         param1.append(c['events'][e][db_name1])
+        #         param2.append(c['events'][e][db_name2])
+
+
+        # PI: API v2 logic
         for c in self.catalogs:
-            for e in c['events']:
-                param1.append(c['events'][e][db_name1])
-                param2.append(c['events'][e][db_name2])
-            
+
+            for event in c:
+
+                # Get the parameter values
+                value1 = self.get_parameter_value(event['default_parameters'], db_name1)
+                value2 = self.get_parameter_value(event['default_parameters'], db_name2)
+
+                # Check if both values are not None
+                if value1 is not None and value2 is not None:
+                    param1.append(value1)
+                    param2.append(value2)
+                else:
+                    print(f"Event {event['name']} missing parameter(s): "
+                        f"{db_name1 if value1 is None else ''} "
+                        f"{db_name2 if value2 is None else ''}")
+          
+        
         fig = Figure()
         ax = fig.add_subplot()        
         
