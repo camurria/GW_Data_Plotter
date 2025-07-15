@@ -19,7 +19,7 @@ from gwpy.timeseries import TimeSeries
 #from gwosc.api import fetch_event_json, fetch_json
 
 # PI: use the 2nd version of the GWOSC API
-# replaced fetch_vent_json with fetch_event_version
+# replaced fetch_event_json with fetch_event_version
 from gwosc.api.v2 import fetch_event_version, fetch_json, produce_fetched_objects
 
 
@@ -1332,9 +1332,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         for param in param_list:
             if param['name'] == parameter_name:
                 return param['best']
-            else:
-                print (f"Parameter {parameter_name} not found in event data.")
-                return None
+        print (f"Parameter {parameter_name} not found in event data.")
+        return None
 
 
 ############################
@@ -1358,30 +1357,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             #             param.append(value)
 
 
-            # print('length of catalogs:', len(self.catalogs))
-            
-            # Print all the elements of catalogs
-            # for c in self.catalogs:
-            #     print(c)
-
 
             # PI: API v2 logic
             for c in self.catalogs:
 
-                # Convert the generator object to a list
-                all_catalog_events = list(c)
-                for event in all_catalog_events:
+                for event in c:
 
-                    # PI: THIS WORKS
-                    # for param in event['default_parameters']:
-                    #     print(f"Parameter Name: {param['name']}, Best Value: {param['best']}")
-
-
-                    # TODO: Need to fix how to get the parameter value
+                    # Get the parameter value
                     value = self.get_parameter_value(event['default_parameters'], db_name)
-                    
-                    # print(value)
-                    
+                    if value is None:
+                        print(f"Event {event['name']} does not have the parameter '{db_name}'.")
+
                     if value: #this is to remove Nones
                         param.append(value)            
                 
@@ -2042,18 +2028,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
             # PI: API v2 logic (with 'format=json')
-            # catalogs_url = f"https://gwosc.org/api/v2/catalogs/{catalog}/events?format=json&lastver=true&include-default-parameters=true"
+            catalog_url = f"https://gwosc.org/api/v2/catalogs/{catalog}/events?format=json&lastver=true&include-default-parameters=true"
 
-            # Trial without 'format=json'
-            catalog_url = f"https://gwosc.org/api/v2/catalogs/{catalog}/events?lastver=true&include-default-parameters=true"    
+            # Trial without 'format=json' => also works, which one to choose?
+            # catalog_url = f"https://gwosc.org/api/v2/catalogs/{catalog}/events?lastver=true&include-default-parameters=true"    
             
-            # Link based on 'event-versions' endpoint
-            # catalog_url = f"https://gwosc.org/api/v2/event-versions?format=json&release={catalog}&lastver=true&include-default-parameters=true"
             
-            # Link based on 'catalogs' endpoint
-            # catalog_url = f"https://gwosc.org/api/v2/catalogs/{catalog}/events?format=json&lastver=true&include-default-parameters=true"
-            
-            catalog_events = produce_fetched_objects(catalog_url)
+            # Convert the generator object to  a list
+            # This is a workaround to address the exhaustion of the generator object 
+            # after the first complete iteration and avoid having to re-fetch the catalogs.
+            # (see definition of 'produce_fetched_objects' in 'v2.py' at /gwosc/api)
+            catalog_events = list(produce_fetched_objects(catalog_url))
+
 
             output += catalog
             output += "\n"
