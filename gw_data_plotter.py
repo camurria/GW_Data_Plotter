@@ -1356,20 +1356,37 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             #         if value: #this is to remove Nones
             #             param.append(value)
 
+            
 
 
             # PI: API v2 logic
-            for c in self.catalogs:
+            if db_name == 'GPS':
 
-                for event in c:
+                for c in self.catalogs:
 
-                    # Get the parameter value
-                    value = self.get_parameter_value(event['default_parameters'], db_name)
-                    if value is None:
-                        print(f"Event {event['name']} missing parameter: {db_name}")
+                    for event in c:
 
-                    if value: #this is to remove Nones
-                        param.append(value)            
+                        # Get event's GPS value (not included in 'default_parameters' list of dictionaries)
+                        value = event['gps']
+                        
+                        if value is None:
+                            print(f"Event {event['name']} missing parameter: {db_name}")
+                        else:    
+                            param.append(value)
+            else:
+
+                for c in self.catalogs:
+                    
+                    for event in c:
+                        
+                        # Get parameter value from the 'default parameters'
+                        value = self.get_parameter_value(event['default_parameters'], db_name)
+                        
+                        if value is None:
+                            print(f"Event {event['name']} missing parameter: {db_name}")
+                        else:
+                            param.append(value)
+                            
                 
 
             fig = Figure()
@@ -2044,7 +2061,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         
         self.catalogs = []
         for catalog in catalog_list_names:
-            
+
             # PI: API v1 logic
             # c = fetch_json(f"https://gwosc.org/eventapi/json/query/show?release={catalog}&lastver=true")
 
