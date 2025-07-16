@@ -1376,7 +1376,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             else:
 
                 for c in self.catalogs:
-                    
+
                     for event in c:
                         
                         # Get parameter value from the 'default parameters'
@@ -1453,14 +1453,26 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #         param2.append(c['events'][e][db_name2])
 
 
+       
         # PI: API v2 logic
         for c in self.catalogs:
 
             for event in c:
 
-                # Get the parameter values
-                value1 = self.get_parameter_value(event['default_parameters'], db_name1)
-                value2 = self.get_parameter_value(event['default_parameters'], db_name2)
+                # Get parameter values depending on which parameter is 'GPS' and which is not
+                if db_name1 != 'GPS' and db_name2 != 'GPS':
+                    value1 = self.get_parameter_value(event['default_parameters'], db_name1)
+                    value2 = self.get_parameter_value(event['default_parameters'], db_name2)    
+                elif db_name1 == 'GPS' and db_name2 != 'GPS':
+                    value1 = event['gps']
+                    value2 = self.get_parameter_value(event['default_parameters'], db_name2)
+                elif db_name1 != 'GPS' and db_name2 == 'GPS':
+                    value1 = self.get_parameter_value(event['default_parameters'], db_name1)
+                    value2 = event['gps']
+                else:
+                    value1 = event['gps']
+                    value2 = event['gps']
+
 
                 # Check if both values are not None
                 if value1 is not None and value2 is not None:
