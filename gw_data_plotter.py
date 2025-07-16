@@ -2044,16 +2044,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         
         self.catalogs = []
         for catalog in catalog_list_names:
+            
             # PI: API v1 logic
             # c = fetch_json(f"https://gwosc.org/eventapi/json/query/show?release={catalog}&lastver=true")
-            
 
-
-            # PI: API v2 logic (with 'format=json')
-            catalog_url = f"https://gwosc.org/api/v2/catalogs/{catalog}/events?format=json&lastver=true&include-default-parameters=true"
-
-            # Trial without 'format=json' => also works, which one to choose?
-            # catalog_url = f"https://gwosc.org/api/v2/catalogs/{catalog}/events?lastver=true&include-default-parameters=true"    
+            # PI: API v2 logic
+            catalog_url = f"https://gwosc.org/api/v2/catalogs/{catalog}/events?lastver=true&include-default-parameters=true"    
             
             
             # Convert the generator object to  a list
