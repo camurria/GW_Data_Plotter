@@ -16,7 +16,7 @@ from gwosc.datasets import event_gps
 from gwpy.time import from_gps
 from gwpy.timeseries import TimeSeries
 
-#from gwosc.api import fetch_event_json, fetch_json
+from gwosc.api import fetch_event_json, fetch_json
 
 # PI: use the 2nd version of the GWOSC API
 # replaced fetch_event_json with fetch_event_version
@@ -1862,12 +1862,31 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def print_event_params(self):
 
         event = self.verify_correct_event_name(self.comboBox_4.currentText(), self.EventNameTab3.text())
-            
-        #the method verify_correct_event_name withh return 0 if the event name is not correct
+
+        #the method verify_correct_event_name will return 0 if the event name is not correct
         if event:
             
             self.event_tab3 = event
             try:
+
+                # [PI] --------------------
+                # Use GWTC-only catalogs (exclude community catalogs, e.g. IAS-O3a)
+                # - see Release list: https://gwosc.org/eventapi/html/
+                # - see cumulative GWTC catalog notes: https://gwosc.org/eventapi/html/GWTC/
+                # To keep only GWTC-X-confident catalogs and GWTC-4.0, 
+                # we use a regular expression (regex) pattern:
+                # - 1st part of the pattern matches catalogs: GWTC-1-confident, GWTC-2.1-confident and GWTC-3-confident
+                # - 2nd part of the pattern matches catalogs: GWTC-4.0, GWTC-4.x, GWTC-5.0, ...
+                all_catalogs = find_datasets(type="catalog")
+                regex_pattern = r"GWTC-(?:[0-9.]+-confident|[4-9]\.[0-9]+)$"
+                filtered_catalogs = [
+                    c for c in all_catalogs
+                    if re.match(regex_pattern, c)
+                ]
+                print(f"Filtered GWTC-only catalogs: {filtered_catalogs}\n\n")
+                # [PI] --------------------
+
+
                 info = fetch_event_json(self.event_tab3)
                 text_to_be_printed = f"------------------------------------------\n"
                 text_to_be_printed += f"Main info about {self.event_tab3}:\n"
