@@ -16,11 +16,13 @@ from gwosc.datasets import event_gps
 from gwpy.time import from_gps
 from gwpy.timeseries import TimeSeries
 
-from gwosc.api import fetch_event_json, fetch_json
+# from gwosc.api import fetch_event_json, fetch_json
 
 # PI: use the 2nd version of the GWOSC API
 # replaced fetch_event_json with fetch_event_version
-from gwosc.api.v2 import fetch_event_version, fetch_json, produce_fetched_objects
+from gwosc.api.v2 import fetch_event_version, fetch_json, fetch_event_versions, produce_fetched_objects
+# from gwosc.api.v2 import fetch_event_version, fetch_event_versions, produce_fetched_objects
+
 
 
 
@@ -268,7 +270,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 "unit" : "",
             },
             "Merger Time" : {
-                "db_name" : "GPS",
+                "db_name" : "gps",
                 "unit" : "s",
             }
         } 
@@ -1869,7 +1871,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.event_tab3 = event
             try:
 
-                # [PI] --------------------
+                # ----------------------------------------
+                # PI: API v2 logic to get event parameters
+                #
                 # Use GWTC-only catalogs (exclude community catalogs, e.g. IAS-O3a)
                 # - see Release list: https://gwosc.org/eventapi/html/
                 # - see cumulative GWTC catalog notes: https://gwosc.org/eventapi/html/GWTC/
@@ -1884,43 +1888,120 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     if re.match(regex_pattern, c)
                 ]
                 print(f"Filtered GWTC-only catalogs: {filtered_catalogs}\n\n")
-                # [PI] --------------------
 
 
-                info = fetch_event_json(self.event_tab3)
+                # The function 'fetch_event_versions' returns a generator.
+                # A generator object expires after being iterated-over once, so we convert it to a list.
+                single_event_highest_GWTC_confident_version = fetch_event_versions(
+                    self.event_tab3, 
+                    catalogs=filtered_catalogs
+                )
+                # PI: need this later to get the GPS time of the event
+                stored_event = list(single_event_highest_GWTC_confident_version)
+                
+
+                # Detail-url of the highest version of the event in the GTWC-confident catalogs
+                event_detail_url = stored_event[0]['detail_url']
+
+
+                # Get the specific version of the event (i.e. the highest available in the GWTC-confident catalogs)
+                # Parameters are also a generator that will expire, so we convert it to a list.
+                event_specific_version = fetch_json(event_detail_url)
+                params_url = event_specific_version["parameters_url"]
+
+
+                # PI: need this later to access the skymap and PE Zenodo links
+                parameters = list(produce_fetched_objects(params_url))
+                # print(json.dumps(parameters, indent=2)) #for checking purposes
+
+
+                # Search for the default (preferred) PE results in the dictionary of the different PEs available 
+                for p in parameters:
+                    if p.get('is_preferred'):
+                        event_default_pe = p
+
+
                 text_to_be_printed = f"------------------------------------------\n"
                 text_to_be_printed += f"Main info about {self.event_tab3}:\n"
 
-                #version = '-v3' #for GW150914 and GW170817 this is the last version, to be checked for other events <---->
-                #find the last version of the event in the database
-                version = 0
-                for v in info['events']:
-                    version = v
 
                 for key in self.event_parameters:
                     entry = self.event_parameters[key]
                     db_name = entry['db_name']
-                    entry['value'] = info['events'][version][db_name]
+
                     if key != "Merger Time":
-                        unit = info['events'][version][db_name+'_unit']
-                        upper = info['events'][version][db_name+'_upper']
-                        lower = info['events'][version][db_name+'_lower']
+                        found = False
+                        for param in event_default_pe['parameters']:
+                            if param['name'] == db_name:
+                                entry['value'] = param['best']
+                                unit  = param['unit']
+                                upper = param['upper_error']
+                                lower = param['lower_error']
+                                found = True
+                                break
+                        if not found:
+                            print(f"Parameter '{db_name}' not found in event data.")
+                            entry['value'] = None
+                            unit = upper = lower = None
+                        
                         text_to_be_printed += f"- {key}: {entry['value']} (+{upper}, {lower}) [{unit}]\n"
                     else:
+                        # GPS case
+                        entry['value'] = stored_event[0]['gps']
                         text_to_be_printed += f"- {key}: {entry['value']} [{entry['unit']}] (UTC: {from_gps(entry['value'])})\n"
+                # 
+                # END: API v2 logic to get event parameters
+                # ----------------------------------------
 
-                
-                #print also the links to download the skymaps and the files with all the PE samples
-                #I have to choose a PE sample version to do so
-                pe_v = version
-                for pe in info['events'][version]['parameters']:
-                    if 'combined' in pe:
-                        pe_v = pe
-                skymap_link = info['events'][version]['parameters'][pe_v]['links']['skymap']
+
+            # ----------------------------------------
+            # PI: API v1 logic to get event parameters
+
+                # info = fetch_event_json(self.event_tab3)
+                # text_to_be_printed = f"------------------------------------------\n"
+                # text_to_be_printed += f"Main info about {self.event_tab3}:\n"
+
+                # #version = '-v3' #for GW150914 and GW170817 this is the last version, to be checked for other events <---->
+                # #find the last version of the event in the database
+                # version = 0
+                # for v in info['events']:
+                #     version = v
+
+                # # PI: print event fetched with API v1: seems SNR is returned correctly. Odd.
+                # print(json.dumps(info, indent=2)) 
+
+                # for key in self.event_parameters:
+                #     entry = self.event_parameters[key]
+                #     db_name = entry['db_name']
+                #     entry['value'] = info['events'][version][db_name]
+                #     if key != "Merger Time":
+                #         unit = info['events'][version][db_name+'_unit']
+                #         upper = info['events'][version][db_name+'_upper']
+                #         lower = info['events'][version][db_name+'_lower']
+                #         text_to_be_printed += f"- {key}: {entry['value']} (+{upper}, {lower}) [{unit}]\n"
+                #     else:
+                #         text_to_be_printed += f"- {key}: {entry['value']} [{entry['unit']}] (UTC: {from_gps(entry['value'])})\n"
+            # 
+            # END: API v1 logic to get event parameters
+            # ----------------------------------------
+
+
+                # ----------------------------------------------
+                # PI: TODO need to update skymap and PE links for API v2
+                #
+                # #print also the links to download the skymaps and the files with all the PE samples
+                # #I have to choose a PE sample version to do so
+                # pe_v = version
+                # for pe in info['events'][version]['parameters']:
+                #     if 'combined' in pe:
+                #         pe_v = pe
+                # skymap_link = info['events'][version]['parameters'][pe_v]['links']['skymap']
                                 
-                text_to_be_printed += f"\nThe link to download the skymap in fits is {skymap_link}\n"        
-                PE_link = info['events'][version]['parameters'][pe_v]['data_url']
-                text_to_be_printed += f"\nThe link to download the complete list of all the posterior sample is {PE_link}\n"
+                # text_to_be_printed += f"\nThe link to download the skymap in fits is {skymap_link}\n"        
+                # PE_link = info['events'][version]['parameters'][pe_v]['data_url']
+                # text_to_be_printed += f"\nThe link to download the complete list of all the posterior sample is {PE_link}\n"
+                # ----------------------------------------------
+
                 self.write_log_event(text_to_be_printed)
             except ValueError:
                 self.write_log_event("\nVerify that you have correctly written the event name. You can check the list of all published events in the website gwosc.org")
