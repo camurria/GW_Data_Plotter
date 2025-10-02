@@ -1901,7 +1901,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
                 # test print
-                # print(json.dumps(parameters, indent=2)) #for checking purposes
+                print(json.dumps(parameters, indent=2)) #for checking purposes
 
 
                 # Search for the default (preferred) PE results in the dictionary 
@@ -1912,7 +1912,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
                 # test print
-                print(f"Default PE results for {self.event_tab3}: {json.dumps(event_default_pe, indent=2)}\n\n")            
+                # print(f"Default PE results for {self.event_tab3}: {json.dumps(event_default_pe, indent=2)}\n\n")            
 
 
                 text_to_be_printed = f"------------------------------------------\n"
@@ -1996,6 +1996,37 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 # PE_link = info['events'][version]['parameters'][pe_v]['data_url']
                 # text_to_be_printed += f"\nThe link to download the complete list of all the posterior sample is {PE_link}\n"
                 # ----------------------------------------------
+
+                # ----------------------------------------------
+                # PI: WIP need to update skymap and PE links for API v2
+                #
+                # print also the links to download the skymaps and the files with all the PE samples
+                # I have to choose a PE sample version to do so
+                # selected_pe = None
+                for pe in parameters:
+                    if 'combined' in pe['name']:
+                        selected_pe = pe
+
+                print('checkpoint\n\n')   
+                print(json.dumps(selected_pe, indent=2)) #for checking purposes
+                print(json.dumps(selected_pe['links'], indent=2)) #for checking purposes
+
+                for link in selected_pe['links']:
+                    if link['label'] == 'skymap':
+                        skymap_link = link['url']
+                        text_to_be_printed += f"\nThe link to download the skymap in FITS format is: {skymap_link}\n"        
+                    elif link['label'] == 'posterior-samples':
+                        pe_link = link['url']
+                        text_to_be_printed += f"\nThe link to download the posterior samples of this PE run is: {pe_link}\n"
+
+                        
+                        
+
+                # skymap_link = info['events'][version]['parameters'][pe_v]['links']['skymap']
+                                
+                # PE_link = info['events'][version]['parameters'][pe_v]['data_url']
+                # ----------------------------------------------
+
 
                 self.write_log_event(text_to_be_printed)
             except ValueError:
