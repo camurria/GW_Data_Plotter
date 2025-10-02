@@ -1869,56 +1869,50 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if event:
             
             self.event_tab3 = event
+            print(f"Event selected: {self.event_tab3}")
             try:
 
                 # ----------------------------------------
                 # PI: API v2 logic to get event parameters
-                #
-                # Use GWTC-only catalogs (exclude community catalogs, e.g. IAS-O3a)
-                # - see Release list: https://gwosc.org/eventapi/html/
-                # - see cumulative GWTC catalog notes: https://gwosc.org/eventapi/html/GWTC/
-                # To keep only GWTC-X-confident catalogs and GWTC-4.0, 
-                # we use a regular expression (regex) pattern:
-                # - 1st part of the pattern matches catalogs: GWTC-1-confident, GWTC-2.1-confident and GWTC-3-confident
-                # - 2nd part of the pattern matches catalogs: GWTC-4.0, GWTC-4.x, GWTC-5.0, ...
-                all_catalogs = find_datasets(type="catalog")
-                regex_pattern = r"GWTC-(?:[0-9.]+-confident|[4-9]\.[0-9]+)$"
-                filtered_catalogs = [
-                    c for c in all_catalogs
-                    if re.match(regex_pattern, c)
-                ]
-                print(f"Filtered GWTC-only catalogs: {filtered_catalogs}\n\n")
-
-
-                # The function 'fetch_event_versions' returns a generator.
-                # A generator object expires after being iterated-over once, so we convert it to a list.
-                single_event_highest_GWTC_confident_version = fetch_event_versions(
-                    self.event_tab3, 
-                    catalogs=filtered_catalogs
-                )
-                # PI: need this later to get the GPS time of the event
-                stored_event = list(single_event_highest_GWTC_confident_version)
+                
+                # Get event with the '{event_name}@GWTC' trick 
+                # This returns the highest version of the event in the GWTC-cumulative catalog, 
+                # filtering out community catalogs
+                event_url = f"https://gwosc.org/api/v2/event-versions/{self.event_tab3}@GWTC?include-default-parameters"
+                stored_event = fetch_json(event_url)
                 
 
-                # Detail-url of the highest version of the event in the GTWC-confident catalogs
-                event_detail_url = stored_event[0]['detail_url']
+                # test print
+                # print(f"Event fetched with '@GWTC' trick: {json.dumps(stored_event, indent=2)}\n\n")
+                
 
+                # Detail-url of the highest version of the event in the GTWC-cumulative catalog
+                event_detail_url = stored_event['detail_url']
+                
 
-                # Get the specific version of the event (i.e. the highest available in the GWTC-confident catalogs)
-                # Parameters are also a generator that will expire, so we convert it to a list.
+                # Get the version-specific of the event (need this to get the parameters_url)
                 event_specific_version = fetch_json(event_detail_url)
                 params_url = event_specific_version["parameters_url"]
 
 
-                # PI: need this later to access the skymap and PE Zenodo links
+                # Parameters are a generator that will expire, so we convert it to a list.
+                # need this later to access the skymap and PE Zenodo links
                 parameters = list(produce_fetched_objects(params_url))
+
+
+                # test print
                 # print(json.dumps(parameters, indent=2)) #for checking purposes
 
 
-                # Search for the default (preferred) PE results in the dictionary of the different PEs available 
+                # Search for the default (preferred) PE results in the dictionary 
+                # of the different PEs available 
                 for p in parameters:
                     if p.get('is_preferred'):
                         event_default_pe = p
+
+
+                # test print
+                print(f"Default PE results for {self.event_tab3}: {json.dumps(event_default_pe, indent=2)}\n\n")            
 
 
                 text_to_be_printed = f"------------------------------------------\n"
@@ -1931,7 +1925,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                     if key != "Merger Time":
                         found = False
-                        for param in event_default_pe['parameters']:
+                        for param in stored_event['default_parameters']:
                             if param['name'] == db_name:
                                 entry['value'] = param['best']
                                 unit  = param['unit']
@@ -1947,9 +1941,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                         text_to_be_printed += f"- {key}: {entry['value']} (+{upper}, {lower}) [{unit}]\n"
                     else:
                         # GPS case
-                        entry['value'] = stored_event[0]['gps']
+                        entry['value'] = stored_event['gps']
                         text_to_be_printed += f"- {key}: {entry['value']} [{entry['unit']}] (UTC: {from_gps(entry['value'])})\n"
-                # 
+
+                     
                 # END: API v2 logic to get event parameters
                 # ----------------------------------------
 
