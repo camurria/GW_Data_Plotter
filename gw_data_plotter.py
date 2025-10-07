@@ -2002,23 +2002,30 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 #
                 # print also the links to download the skymaps and the files with all the PE samples
                 # I have to choose a PE sample version to do so
-                # selected_pe = None
+                selected_pe = None
                 for pe in parameters:
                     if 'combined' in pe['name']:
                         selected_pe = pe
 
-                print('checkpoint\n\n')   
-                print(json.dumps(selected_pe, indent=2)) #for checking purposes
-                print(json.dumps(selected_pe['links'], indent=2)) #for checking purposes
+                if selected_pe:
+                    if selected_pe.get('links'):
+                        for link in selected_pe['links']:
+                            if link['label'] == 'skymap':
+                                skymap_link = link['url']
+                                text_to_be_printed += f"\nThe link to download the skymap in FITS format is: {skymap_link}\n"
+                            elif link['label'] == 'posterior-samples':
+                                pe_link = link['url']
+                                text_to_be_printed += f"\nThe link to download the posterior samples of this PE run is: {pe_link}\n"
+                    else:
+                        text_to_be_printed += f"\nNo skymap and PE samples links found for the selected PE result."
+                else:
+                    text_to_be_printed += f"\nNo 'combined' PE result found for {self.event_tab3} to get the skymap and PE samples links. "
 
-                for link in selected_pe['links']:
-                    if link['label'] == 'skymap':
-                        skymap_link = link['url']
-                        text_to_be_printed += f"\nThe link to download the skymap in FITS format is: {skymap_link}\n"        
-                    elif link['label'] == 'posterior-samples':
-                        pe_link = link['url']
-                        text_to_be_printed += f"\nThe link to download the posterior samples of this PE run is: {pe_link}\n"
 
+                # print(json.dumps(selected_pe, indent=2)) #for checking purposes
+                # print(json.dumps(selected_pe['links'], indent=2)) #for checking purposes
+
+                
                         
                         
 
@@ -2031,6 +2038,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.write_log_event(text_to_be_printed)
             except ValueError:
                 self.write_log_event("\nVerify that you have correctly written the event name. You can check the list of all published events in the website gwosc.org")
+            # PI: this is (probably) not triggered anymore with the new API v2
             except KeyError:    
                 #This happen probably if the links to the PE or skymaps are not found
                 #Not to sure what to write in this case
