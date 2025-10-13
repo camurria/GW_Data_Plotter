@@ -1997,6 +1997,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if event:
             self.event_tab3 = event
             try:
+                # ------------------------------------------
+                # PI: NOTE: I will have to query for the event, 
+                # using similar logic as in the 'print_event_params' method above
+
+
                 info = fetch_event_json(self.event_tab3)
                 version = self.event_tab3
                 for v in info['events']:
@@ -2009,6 +2014,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 gracedb_id = info['events'][version]['gracedb_id']
 
 
+                # ------------------------------------------
+                # PI: NOTE: Therefore I need to access the 'gracedb_id' from the event info 
+                # using the new API v2 logic
+                # The part that follows can be remain unchanged, 
+                # as it does not have to do with accessing GWOSC data
+
                 #if possible download the skymaps via grace db
                 found_gracedb = False
 
@@ -2018,6 +2029,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
                 # get url with 'requests'
+                # PI: NOTE: we specifically construct the link for 'superevents'.
+                # There is also an 'events' endpoint.
+                # Should we check for both of them?
                 response = requests.get(f"https://gracedb.ligo.org/api/superevents/{gracedb_id}/files/?format=json")
                 # print('response status:', response.status_code) # for checking purposes: 200 means OK 
                 data = response.json()
