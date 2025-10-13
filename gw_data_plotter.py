@@ -1901,7 +1901,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
                 # test print
-                print(json.dumps(parameters, indent=2)) #for checking purposes
+                # print(json.dumps(parameters, indent=2)) #for checking purposes
 
 
                 # Search for the default (preferred) PE results in the dictionary 
@@ -1943,65 +1943,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                         # GPS case
                         entry['value'] = stored_event['gps']
                         text_to_be_printed += f"- {key}: {entry['value']} [{entry['unit']}] (UTC: {from_gps(entry['value'])})\n"
-
-                     
+  
                 # END: API v2 logic to get event parameters
                 # ----------------------------------------
 
 
-            # ----------------------------------------
-            # PI: API v1 logic to get event parameters
-
-                # info = fetch_event_json(self.event_tab3)
-                # text_to_be_printed = f"------------------------------------------\n"
-                # text_to_be_printed += f"Main info about {self.event_tab3}:\n"
-
-                # #version = '-v3' #for GW150914 and GW170817 this is the last version, to be checked for other events <---->
-                # #find the last version of the event in the database
-                # version = 0
-                # for v in info['events']:
-                #     version = v
-
-                # # PI: print event fetched with API v1: seems SNR is returned correctly. Odd.
-                # print(json.dumps(info, indent=2)) 
-
-                # for key in self.event_parameters:
-                #     entry = self.event_parameters[key]
-                #     db_name = entry['db_name']
-                #     entry['value'] = info['events'][version][db_name]
-                #     if key != "Merger Time":
-                #         unit = info['events'][version][db_name+'_unit']
-                #         upper = info['events'][version][db_name+'_upper']
-                #         lower = info['events'][version][db_name+'_lower']
-                #         text_to_be_printed += f"- {key}: {entry['value']} (+{upper}, {lower}) [{unit}]\n"
-                #     else:
-                #         text_to_be_printed += f"- {key}: {entry['value']} [{entry['unit']}] (UTC: {from_gps(entry['value'])})\n"
-            # 
-            # END: API v1 logic to get event parameters
-            # ----------------------------------------
-
+    
 
                 # ----------------------------------------------
-                # PI: TODO need to update skymap and PE links for API v2
-                #
-                # #print also the links to download the skymaps and the files with all the PE samples
-                # #I have to choose a PE sample version to do so
-                # pe_v = version
-                # for pe in info['events'][version]['parameters']:
-                #     if 'combined' in pe:
-                #         pe_v = pe
-                # skymap_link = info['events'][version]['parameters'][pe_v]['links']['skymap']
-                                
-                # text_to_be_printed += f"\nThe link to download the skymap in fits is {skymap_link}\n"        
-                # PE_link = info['events'][version]['parameters'][pe_v]['data_url']
-                # text_to_be_printed += f"\nThe link to download the complete list of all the posterior sample is {PE_link}\n"
-                # ----------------------------------------------
-
-                # ----------------------------------------------
-                # PI: WIP need to update skymap and PE links for API v2
-                #
-                # print also the links to download the skymaps and the files with all the PE samples
-                # I have to choose a PE sample version to do so
+                # PI: get skymap and PE links following API v2 logic
+                # choose a PE result to do this, e.g. the 'combined' one if available
                 selected_pe = None
                 for pe in parameters:
                     if 'combined' in pe['name']:
@@ -2019,20 +1970,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     else:
                         text_to_be_printed += f"\nNo skymap and PE samples links found for the selected PE result."
                 else:
-                    text_to_be_printed += f"\nNo 'combined' PE result found for {self.event_tab3} to get the skymap and PE samples links. "
-
-
-                # print(json.dumps(selected_pe, indent=2)) #for checking purposes
-                # print(json.dumps(selected_pe['links'], indent=2)) #for checking purposes
-
+                    text_to_be_printed += f"\nNo 'combined' PE result found for {self.event_tab3} to get the skymap and PE samples links."
                 
-                        
-                        
+                # END: get skymap and PE links following API v2 logic
+                # ----------------------------------------
 
-                # skymap_link = info['events'][version]['parameters'][pe_v]['links']['skymap']
-                                
-                # PE_link = info['events'][version]['parameters'][pe_v]['data_url']
-                # ----------------------------------------------
 
 
                 self.write_log_event(text_to_be_printed)
