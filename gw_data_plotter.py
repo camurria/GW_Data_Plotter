@@ -2006,6 +2006,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 # [PI] 
                 # --- START: this is obsolete with API v2 logic, to be removed
+                #
+                # Basically, setting 'version' equal to v means means that we get the event name with the
+                # '-v' version suffix, e.g. 'GW150914-v1'
+                #
+                # For API v2, following this link: https://gwosc.org/api/v2/docs#get-/api/v2/event-versions/-name-
+                # if we do not specify a version, we get the highest version of the event.
+                #
                 # version = self.event_tab3
                 # for v in info['events']:
                 #     version = v #there should be only one version for each event
