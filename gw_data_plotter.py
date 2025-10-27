@@ -24,8 +24,6 @@ from gwosc.api.v2 import fetch_event_version, fetch_json, fetch_event_versions, 
 # from gwosc.api.v2 import fetch_event_version, fetch_event_versions, produce_fetched_objects
 
 
-
-
 from layout import Ui_MainWindow
 # from layout_macOS import Ui_MainWindow #PI: use a different layout for MacOS for the 'About' item
 
@@ -2000,19 +1998,31 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 # ------------------------------------------
                 # PI: NOTE: I will have to query for the event, 
                 # using similar logic as in the 'print_event_params' method above
+                # I do not need the @GWTC constraint here, since the 'grace_id' key 
+                # is not affected by different event versions.
 
+                # info = fetch_event_json(self.event_tab3)
+                info = fetch_event_version(self.event_tab3)
 
-                info = fetch_event_json(self.event_tab3)
-                version = self.event_tab3
-                for v in info['events']:
-                    version = v #there should be only one version for each event
+                # [PI] 
+                # --- START: this is obsolete with API v2 logic, to be removed
+                # version = self.event_tab3
+                # for v in info['events']:
+                #     version = v #there should be only one version for each event
                 #print('version',version)
+                # --- END: obsolete with API v2 logic
 
                 #check for graceDB link:
                 # print('graceDB',info['events'][version]['gracedb_id'])
-            
-                gracedb_id = info['events'][version]['gracedb_id']
 
+                # [PI]
+                # --- START: to be removed with API v2 logic
+                # gracedb_id = info['events'][version]['gracedb_id']
+                # --- END: to be removed with API v2 logic
+
+                # PI: I will get the 'grace_db' similar to getting the gps value:
+                # event["gps"]
+                gracedb_id = info['grace_id']
 
                 # ------------------------------------------
                 # PI: NOTE: Therefore I need to access the 'gracedb_id' from the event info 
@@ -2176,7 +2186,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # after the first complete iteration and avoid having to re-fetch the catalogs.
             # (see definition of 'produce_fetched_objects' in 'v2.py' at /gwosc/api)
             catalog_events = list(produce_fetched_objects(catalog_url))
-
 
             output += catalog
             output += "\n"
