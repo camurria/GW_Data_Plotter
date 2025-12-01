@@ -1880,10 +1880,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 stored_event = fetch_json(event_url)
                 
 
-                # test print
-                # print(f"Event fetched with '@GWTC' trick: {json.dumps(stored_event, indent=2)}\n\n")
-                
-
                 # Detail-url of the highest version of the event in the GTWC-cumulative catalog
                 event_detail_url = stored_event['detail_url']
                 
@@ -1898,19 +1894,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 parameters = list(produce_fetched_objects(params_url))
 
 
-                # test print
-                # print(json.dumps(parameters, indent=2)) #for checking purposes
-
-
                 # Search for the default (preferred) PE results in the dictionary 
                 # of the different PEs available 
                 for p in parameters:
                     if p.get('is_preferred'):
                         event_default_pe = p
-
-
-                # test print
-                # print(f"Default PE results for {self.event_tab3}: {json.dumps(event_default_pe, indent=2)}\n\n")            
 
 
                 text_to_be_printed = f"------------------------------------------\n"
