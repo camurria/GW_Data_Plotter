@@ -1349,16 +1349,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # print(db_name)
 
 
-            # PI: previous API v1 logic            
-            # for c in self.catalogs:
-            #     for e in c['events']:
-            #         value = c['events'][e][db_name]
-            #         if value: #this is to remove Nones
-            #             param.append(value)
-
-            
-
-
             # PI: API v2 logic
             if db_name == 'GPS':
 
@@ -1444,16 +1434,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         db_name2 = self.event_parameters[key2]['db_name']
         param1 = []
         param2 = []
-        
-
-        # PI: previous API v1 logic
-        # for c in self.catalogs:
-        #     for e in c['events']:
-        #         param1.append(c['events'][e][db_name1])
-        #         param2.append(c['events'][e][db_name2])
 
 
-       
         # PI: API v2 logic
         for c in self.catalogs:
 
@@ -2168,9 +2150,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         
         self.catalogs = []
         for catalog in catalog_list_names:
-
-            # PI: API v1 logic
-            # c = fetch_json(f"https://gwosc.org/eventapi/json/query/show?release={catalog}&lastver=true")
 
             # PI: API v2 logic
             catalog_url = f"https://gwosc.org/api/v2/catalogs/{catalog}/events?lastver=true&include-default-parameters=true"    
