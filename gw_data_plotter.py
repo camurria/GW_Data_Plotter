@@ -1965,60 +1965,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if event:
             self.event_tab3 = event
             try:
-                # ------------------------------------------
-                # PI: NOTE: I will have to query for the event, 
-                # using similar logic as in the 'print_event_params' method above
-                # I do not need the @GWTC constraint here, since the 'grace_id' key 
-                # is not affected by different event versions.
 
-                # info = fetch_event_json(self.event_tab3)
+                # 'fetch_event_version' called without specifying version defaults to highest version of event
                 info = fetch_event_version(self.event_tab3)
-
-                # [PI] 
-                # --- START: this is obsolete with API v2 logic, to be removed
-                #
-                # Basically, setting 'version' equal to v means means that we get the event name with the
-                # '-v' version suffix, e.g. 'GW150914-v1'
-                #
-                # For API v2, following this link: https://gwosc.org/api/v2/docs#get-/api/v2/event-versions/-name-
-                # if we do not specify a version, we get the highest version of the event.
-                #
-                # version = self.event_tab3
-                # for v in info['events']:
-                #     version = v #there should be only one version for each event
-                #print('version',version)
-                # --- END: obsolete with API v2 logic
-
-                #check for graceDB link:
-                # print('graceDB',info['events'][version]['gracedb_id'])
-
-                # [PI]
-                # --- START: to be removed with API v2 logic
-                # gracedb_id = info['events'][version]['gracedb_id']
-                # --- END: to be removed with API v2 logic
-
-                # PI: I will get the 'grace_db' similar to getting the gps value:
-                # event["gps"]
                 gracedb_id = info['grace_id']
-
-                # ------------------------------------------
-                # PI: NOTE: Therefore I need to access the 'gracedb_id' from the event info 
-                # using the new API v2 logic
-                # The part that follows can be remain unchanged, 
-                # as it does not have to do with accessing GWOSC data
 
                 #if possible download the skymaps via grace db
                 found_gracedb = False
 
-                
                 # We need to check which skymaps are available on gracedb
                 list_available_png = []
 
 
                 # get url with 'requests'
-                # PI: NOTE: we specifically construct the link for 'superevents'.
-                # There is also an 'events' endpoint.
-                # Should we check for both of them?
                 response = requests.get(f"https://gracedb.ligo.org/api/superevents/{gracedb_id}/files/?format=json")
                 # print('response status:', response.status_code) # for checking purposes: 200 means OK 
                 data = response.json()
