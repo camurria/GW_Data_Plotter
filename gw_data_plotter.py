@@ -268,7 +268,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 "unit" : "",
             },
             "Merger Time" : {
-                "db_name" : "gps",
+                "db_name" : "GPS",
                 "unit" : "s",
             }
         } 
