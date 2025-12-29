@@ -1849,7 +1849,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if event:
             
             self.event_tab3 = event
-            print(f"Event selected: {self.event_tab3}")
             try:
 
                 # ----------------------------------------
