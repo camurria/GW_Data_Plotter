@@ -1,0 +1,16 @@
+name: app_upd
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - pip
+  - setuptools
+  - numpy<2.0 # safeguard until GW packages transition to NumPy 2.0
+  - scipy=1.15.2
+  - gwpy=3.0.11
+  - gwosc=0.8.1
+  - python-framel # for reading/writing to GWF format
+  - pyinstaller>=6.7 # for binary creation (development only)
+  - pip:
+      - pyqt6==6.7.1    
