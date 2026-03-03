@@ -1,18 +1,24 @@
-name: app_upd
+name: app_apiv2
 channels:
   - conda-forge
   - defaults
 dependencies:
-  - python=3.11
+  # core
+  - python=3.12
   - pip
   - setuptools
-  - numpy<2.0 # safeguard until GW packages transition to NumPy 2.0
-  - scipy<1.17
-  - gwpy=3.0.11
+
+  # scientific / GW
+  - numpy<2.0                     # safeguard until GW packages transition to NumPy 2.0
+  - scipy
+  - gwpy<4.0                      # precautionary pin for latest GWPy release
   - gwosc=0.8.1
-  # for reading/writing to GWF format
-  - python-framel
-  - python-ldas-tools-framecpp
-  - pyinstaller>=6.7 # for binary creation (development only)
+  - python-framel                 # GWF file format support
+  - python-ldas-tools-framecpp    # GWF file format support
+
+  # development only
+  - pyinstaller>=6.7
+
+  # GUI
   - pip:
       - pyqt6==6.7.1    
