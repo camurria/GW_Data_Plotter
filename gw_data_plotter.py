@@ -245,19 +245,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.event_parameters = {
             "Mass 1" : {
                 "db_name" : "mass_1_source",
-                "unit" : "M$_\odot$",       
+                "unit" : r"M$_\odot$",       
             },
             "Mass 2" : {
                 "db_name" : "mass_2_source",
-                "unit" : "M$_\odot$",
+                "unit" : r"M$_\odot$",
             },            
             "Chirp Mass" : {
                 "db_name" : "chirp_mass_source",
-                "unit" : "M$_\odot$",
+                "unit" : r"M$_\odot$",
             },
             "Remnant Mass" : {
                 "db_name" : "final_mass_source",
-                "unit" : "M$_\odot$",
+                "unit" : r"M$_\odot$",
             },
             "Luminosity Distance" : {
                 "db_name" : "luminosity_distance",
