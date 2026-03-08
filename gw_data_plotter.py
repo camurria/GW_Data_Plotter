@@ -15,7 +15,13 @@ from gwosc.datasets import find_datasets, event_detectors
 from gwosc.datasets import event_gps
 from gwpy.time import from_gps
 from gwpy.timeseries import TimeSeries
-from gwosc.api import fetch_event_json, fetch_json
+
+# from gwosc.api import fetch_event_json, fetch_json
+
+# PI: use the 2nd version of the GWOSC API
+# replaced fetch_event_json with fetch_event_version
+from gwosc.api.v2 import fetch_event_version, fetch_json, fetch_event_versions, produce_fetched_objects
+# from gwosc.api.v2 import fetch_event_version, fetch_event_versions, produce_fetched_objects
 
 
 from layout import Ui_MainWindow
@@ -239,20 +245,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.event_parameters = {
             "Mass 1" : {
                 "db_name" : "mass_1_source",
-                "unit" : "M$_\odot$",
-                
+                "unit" : r"M$_\odot$",       
             },
             "Mass 2" : {
                 "db_name" : "mass_2_source",
-                "unit" : "M$_\odot$",
+                "unit" : r"M$_\odot$",
             },            
             "Chirp Mass" : {
                 "db_name" : "chirp_mass_source",
-                "unit" : "M$_\odot$",
+                "unit" : r"M$_\odot$",
             },
             "Remnant Mass" : {
                 "db_name" : "final_mass_source",
-                "unit" : "M$_\odot$",
+                "unit" : r"M$_\odot$",
             },
             "Luminosity Distance" : {
                 "db_name" : "luminosity_distance",
@@ -1310,6 +1315,28 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
 ############################
+# PI: method to get the value of a specific parameter from the data
+
+    def get_parameter_value(self, param_list, parameter_name):
+        """
+        Fetch the value of a specific parameter from the data.
+
+        Parameters:
+        - param_list: list of event's parameters.
+        - parameter_name: The name of the parameter to look up.
+
+        Returns:
+        - The value of the parameter, or None if not found.
+        """
+
+        for param in param_list:
+            if param['name'] == parameter_name:
+                return param['best']
+        print (f"Parameter {parameter_name} not found in event data.")
+        return None
+
+
+############################
 # PI: This code block plots the histogram of a specified parameter for all GW events.
 # It must run only AFTER the catalogs data has been downloaded.
 
@@ -1319,12 +1346,37 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             db_name = self.event_parameters[key]['db_name']
             param = []
-            
-            for c in self.catalogs:
-                for e in c['events']:
-                    value = c['events'][e][db_name]
-                    if value: #this is to remove Nones
-                        param.append(value)
+            # print(db_name)
+
+
+            # PI: API v2 logic
+            if db_name == 'GPS':
+
+                for c in self.catalogs:
+
+                    for event in c:
+
+                        # Get event's GPS value (not included in 'default_parameters' list of dictionaries)
+                        value = event['gps']
+                        
+                        if value is None:
+                            print(f"Event {event['name']} missing parameter: {db_name}")
+                        else:    
+                            param.append(value)
+            else:
+
+                for c in self.catalogs:
+
+                    for event in c:
+                        
+                        # Get parameter value from the 'default parameters'
+                        value = self.get_parameter_value(event['default_parameters'], db_name)
+                        
+                        if value is None:
+                            print(f"Event {event['name']} missing parameter: {db_name}")
+                        else:
+                            param.append(value)
+                            
                 
 
             fig = Figure()
@@ -1382,12 +1434,38 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         db_name2 = self.event_parameters[key2]['db_name']
         param1 = []
         param2 = []
-        
+
+
+        # PI: API v2 logic
         for c in self.catalogs:
-            for e in c['events']:
-                param1.append(c['events'][e][db_name1])
-                param2.append(c['events'][e][db_name2])
-            
+
+            for event in c:
+
+                # Get parameter values depending on which parameter is 'GPS' and which is not
+                if db_name1 != 'GPS' and db_name2 != 'GPS':
+                    value1 = self.get_parameter_value(event['default_parameters'], db_name1)
+                    value2 = self.get_parameter_value(event['default_parameters'], db_name2)    
+                elif db_name1 == 'GPS' and db_name2 != 'GPS':
+                    value1 = event['gps']
+                    value2 = self.get_parameter_value(event['default_parameters'], db_name2)
+                elif db_name1 != 'GPS' and db_name2 == 'GPS':
+                    value1 = self.get_parameter_value(event['default_parameters'], db_name1)
+                    value2 = event['gps']
+                else:
+                    value1 = event['gps']
+                    value2 = event['gps']
+
+
+                # Check if both values are not None
+                if value1 is not None and value2 is not None:
+                    param1.append(value1)
+                    param2.append(value2)
+                else:
+                    print(f"Event {event['name']} missing parameter(s): "
+                        f"{db_name1 if value1 is None else ''} "
+                        f"{db_name2 if value2 is None else ''}")
+          
+        
         fig = Figure()
         ax = fig.add_subplot()        
         
@@ -1766,49 +1844,110 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def print_event_params(self):
 
         event = self.verify_correct_event_name(self.comboBox_4.currentText(), self.EventNameTab3.text())
-            
-        #the method verify_correct_event_name withh return 0 if the event name is not correct
+
+        #the method verify_correct_event_name will return 0 if the event name is not correct
         if event:
             
             self.event_tab3 = event
             try:
-                info = fetch_event_json(self.event_tab3)
+
+                # ----------------------------------------
+                # PI: API v2 logic to get event parameters
+                
+                # Get event with the '{event_name}@GWTC' trick 
+                # This returns the highest version of the event in the GWTC-cumulative catalog, 
+                # filtering out community catalogs
+                event_url = f"https://gwosc.org/api/v2/event-versions/{self.event_tab3}@GWTC?include-default-parameters"
+                stored_event = fetch_json(event_url)
+                
+
+                # Detail-url of the highest version of the event in the GTWC-cumulative catalog
+                event_detail_url = stored_event['detail_url']
+                
+
+                # Get the version-specific of the event (need this to get the parameters_url)
+                event_specific_version = fetch_json(event_detail_url)
+                params_url = event_specific_version["parameters_url"]
+
+
+                # Parameters are a generator that will expire, so we convert it to a list.
+                # need this later to access the skymap and PE Zenodo links
+                parameters = list(produce_fetched_objects(params_url))
+
+
+                # Search for the default (preferred) PE results in the dictionary 
+                # of the different PEs available 
+                for p in parameters:
+                    if p.get('is_preferred'):
+                        event_default_pe = p
+
+
                 text_to_be_printed = f"------------------------------------------\n"
                 text_to_be_printed += f"Main info about {self.event_tab3}:\n"
 
-                #version = '-v3' #for GW150914 and GW170817 this is the last version, to be checked for other events <---->
-                #find the last version of the event in the database
-                version = 0
-                for v in info['events']:
-                    version = v
 
                 for key in self.event_parameters:
                     entry = self.event_parameters[key]
                     db_name = entry['db_name']
-                    entry['value'] = info['events'][version][db_name]
+
                     if key != "Merger Time":
-                        unit = info['events'][version][db_name+'_unit']
-                        upper = info['events'][version][db_name+'_upper']
-                        lower = info['events'][version][db_name+'_lower']
+                        found = False
+                        for param in stored_event['default_parameters']:
+                            if param['name'] == db_name:
+                                entry['value'] = param['best']
+                                unit  = param['unit']
+                                upper = param['upper_error']
+                                lower = param['lower_error']
+                                found = True
+                                break
+                        if not found:
+                            print(f"Parameter '{db_name}' not found in event data.")
+                            entry['value'] = None
+                            unit = upper = lower = None
+                        
                         text_to_be_printed += f"- {key}: {entry['value']} (+{upper}, {lower}) [{unit}]\n"
                     else:
+                        # GPS case
+                        entry['value'] = stored_event['gps']
                         text_to_be_printed += f"- {key}: {entry['value']} [{entry['unit']}] (UTC: {from_gps(entry['value'])})\n"
+  
+                # END: API v2 logic to get event parameters
+                # ----------------------------------------
 
+
+    
+
+                # ----------------------------------------------
+                # PI: get skymap and PE links following API v2 logic
+                # choose a PE result to do this, e.g. the 'combined' one if available
+                selected_pe = None
+                for pe in parameters:
+                    if 'combined' in pe['name']:
+                        selected_pe = pe
+
+                if selected_pe:
+                    if selected_pe.get('links'):
+                        for link in selected_pe['links']:
+                            if link['label'] == 'skymap':
+                                skymap_link = link['url']
+                                text_to_be_printed += f"\nThe link to download the skymap in FITS format is: {skymap_link}\n"
+                            elif link['label'] == 'posterior-samples':
+                                pe_link = link['url']
+                                text_to_be_printed += f"\nThe link to download the posterior samples of this PE run is: {pe_link}\n"
+                    else:
+                        text_to_be_printed += f"\nNo skymap and PE samples links found for the selected PE result."
+                else:
+                    text_to_be_printed += f"\nNo 'combined' PE result found for {self.event_tab3} to get the skymap and PE samples links."
                 
-                #print also the links to download the skymaps and the files with all the PE samples
-                #I have to choose a PE sample version to do so
-                pe_v = version
-                for pe in info['events'][version]['parameters']:
-                    if 'combined' in pe:
-                        pe_v = pe
-                skymap_link = info['events'][version]['parameters'][pe_v]['links']['skymap']
-                                
-                text_to_be_printed += f"\nThe link to download the skymap in fits is {skymap_link}\n"        
-                PE_link = info['events'][version]['parameters'][pe_v]['data_url']
-                text_to_be_printed += f"\nThe link to download the complete list of all the posterior sample is {PE_link}\n"
+                # END: get skymap and PE links following API v2 logic
+                # ----------------------------------------
+
+
+
                 self.write_log_event(text_to_be_printed)
             except ValueError:
                 self.write_log_event("\nVerify that you have correctly written the event name. You can check the list of all published events in the website gwosc.org")
+            # PI: this is (probably) not triggered anymore with the new API v2
             except KeyError:    
                 #This happen probably if the links to the PE or skymaps are not found
                 #Not to sure what to write in this case
@@ -1825,22 +1964,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if event:
             self.event_tab3 = event
             try:
-                info = fetch_event_json(self.event_tab3)
-                version = self.event_tab3
-                for v in info['events']:
-                    version = v #there should be only one version for each event
-                #print('version',version)
 
-                #check for graceDB link:
-                # print('graceDB',info['events'][version]['gracedb_id'])
-            
-                gracedb_id = info['events'][version]['gracedb_id']
-
+                # 'fetch_event_version' called without specifying version defaults to highest version of event
+                info = fetch_event_version(self.event_tab3)
+                gracedb_id = info['grace_id']
 
                 #if possible download the skymaps via grace db
                 found_gracedb = False
 
-                
                 # We need to check which skymaps are available on gracedb
                 list_available_png = []
 
@@ -1977,10 +2108,20 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         
         self.catalogs = []
         for catalog in catalog_list_names:
-            c = fetch_json(f"https://gwosc.org/eventapi/json/query/show?release={catalog}&lastver=true")
+
+            # PI: API v2 logic
+            catalog_url = f"https://gwosc.org/api/v2/catalogs/{catalog}/events?lastver=true&include-default-parameters=true"    
+            
+            
+            # Convert the generator object to  a list
+            # This is a workaround to address the exhaustion of the generator object 
+            # after the first complete iteration and avoid having to re-fetch the catalogs.
+            # (see definition of 'produce_fetched_objects' in 'v2.py' at /gwosc/api)
+            catalog_events = list(produce_fetched_objects(catalog_url))
+
             output += catalog
             output += "\n"
-            self.catalogs.append(c)
+            self.catalogs.append(catalog_events)        
 
         progress_callback.emit(100)
         return output+"\n- Done!\n"
