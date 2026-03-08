@@ -1,4 +1,4 @@
-name: app_apiv2
+name: app
 channels:
   - conda-forge
   - defaults
