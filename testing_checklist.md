@@ -1,12 +1,12 @@
-# Testing Checklist — `app_apiv2` environment
+# Testing Checklist
 
 ---
 
 ## Before starting
 
-- [x] Activate the new environment: `conda activate app_apiv2`
-- [x] Launch the app: `python gw_data_plotter.py`
-- [x] App opens without errors or warnings in the terminal
+- [ ] Activate the new environment: `conda activate app`
+- [ ] Launch the app: `python gw_data_plotter.py`
+- [ ] App opens without errors or warnings in the terminal
 
 ---
 
@@ -60,7 +60,7 @@
 - [ ] Plot Qscan with default settings
 - [ ] Plot with log y-axis enabled
 - [ ] Plot with a custom Emax value
-- [ ] Check colorbar starts from 0 (verify the negative values issue is gone)
+- [ ] Check colorbar starts from 0
 - [ ] Update an existing Qscan plot (re-click button → window updates, no duplicate)
 
 ---
