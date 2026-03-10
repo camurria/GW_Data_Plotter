@@ -2094,19 +2094,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def download_catalogs(self, progress_callback):
         output = "Catalogs downloaded:\n"
-        # catalog_list_names = ['GWTC-1-confident','GWTC-2.1-confident', 'GWTC-3-confident'] #note: gives duplicate events because of GWOSC change in early catalogs
-        catalog_list_names = ['GWTC'] # use the cumulative GWTC catalog
 
-        # Add all the confident catalogs not already included in the list
-        # all_catalogs = find_datasets(type="catalog")
-        # for c in all_catalogs:
-        #     if re.match(r"GWTC-[0-9]-confident", c):
-        #         if c not in catalog_list_names:
-        #             catalog_list_names.append(c)
-
-        # Add GWTC-4-confident is not present in the updated list add O4_Discovery_Papers
-        # if 'GWTC-4-confident' not in catalog_list_names:
-        #     catalog_list_names.append('O4_Discovery_Papers')
+        # use the cumulative GWTC catalog 
+        # see: https://gwosc.org/eventapi/html/GWTC/
+        catalog_list_names = ['GWTC'] 
         
         self.catalogs = []
         for catalog in catalog_list_names:
