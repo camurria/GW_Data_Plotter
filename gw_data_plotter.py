@@ -1,9 +1,7 @@
 import os  
 import math
 import sys
-import json
 import traceback
-import re
 import requests
 
 import numpy as np
@@ -16,12 +14,9 @@ from gwosc.datasets import event_gps
 from gwpy.time import from_gps
 from gwpy.timeseries import TimeSeries
 
-# from gwosc.api import fetch_event_json, fetch_json
 
 # PI: use the 2nd version of the GWOSC API
-# replaced fetch_event_json with fetch_event_version
 from gwosc.api.v2 import fetch_event_version, fetch_json, fetch_event_versions, produce_fetched_objects
-# from gwosc.api.v2 import fetch_event_version, fetch_event_versions, produce_fetched_objects
 
 
 from layout import Ui_MainWindow
@@ -42,6 +37,8 @@ from PyQt6.QtGui import QTextCursor, QFontDatabase, QFont
 
 basedir = os.path.dirname(__file__) 
 
+# S5 start GPS, see: https://gwosc.org/archive/S5/
+S5_START_GPS = 815155213
 
 #environment variable to set auto screen scale factor
 os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1"
@@ -991,9 +988,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             try:
                 self.write_log(f"GPS {label} requested: {GPS_in} (UTC: {from_gps(GPS_in)})")
                 GPS_out = float(GPS_in)
-                if len(str(int(GPS_out))) < 10:
+                if GPS_out < S5_START_GPS:
                     GPS_out = 0
-                    raise ValueError(f"GPS {label} has to have 10 digits")
+                    raise ValueError(f"GPS {label} predates the earliest GWOSC data (S5 start GPS: {S5_START_GPS})")
 
             except ValueError as ve:
                 error_code = f"Value error for GPS {label}: "+str(ve)
