@@ -1,9 +1,7 @@
 import os  
 import math
 import sys
-import json
 import traceback
-import re
 import requests
 
 import numpy as np
@@ -16,12 +14,9 @@ from gwosc.datasets import event_gps
 from gwpy.time import from_gps
 from gwpy.timeseries import TimeSeries
 
-# from gwosc.api import fetch_event_json, fetch_json
 
 # PI: use the 2nd version of the GWOSC API
-# replaced fetch_event_json with fetch_event_version
 from gwosc.api.v2 import fetch_event_version, fetch_json, fetch_event_versions, produce_fetched_objects
-# from gwosc.api.v2 import fetch_event_version, fetch_event_versions, produce_fetched_objects
 
 
 from layout import Ui_MainWindow
