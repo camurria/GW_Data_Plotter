@@ -34,10 +34,3 @@ Use:
 * `environment_MacOS_arm64.yml` for Mac users with an Apple processor;
 * `environment_MacOS_x86_64.yml` for Mac users with an Intel processor;
 * `environment_WindowsOS.yml` for Windows users.
-
-## Main Python packages
-If for some reason you can't use the previous environment files you can anyway build your environment 
-installing the following packages:
-* `PyQt6` (version 6.6.1, this version is not directly available on conda so you have to install it with pip);
-* `gwpy`(version 3.0.8);
-* `gwosc` (version 0.7.1).
