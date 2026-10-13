@@ -11,7 +11,7 @@ dependencies:
   # scientific / GW
   - numpy<2.0                     # safeguard until GW packages transition to NumPy 2.0
   - scipy
-  - gwpy<4.0                      # precautionary pin for latest GWPy release
+  - gwpy=4.0.1                      # Updated to avoid conflicts with FrameCPP
   - gwosc=0.8.1
   - python-framel                 # GWF file format support
   - python-ldas-tools-framecpp    # GWF file format support
