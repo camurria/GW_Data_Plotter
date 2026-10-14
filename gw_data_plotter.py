@@ -1,4 +1,4 @@
-import os  
+import os
 import math
 import sys
 import traceback
@@ -35,7 +35,7 @@ from PyQt6.QtGui import QTextCursor, QFontDatabase, QFont
 
 #from matplotlib import pyplot as plt #WARNING in MacOs this import creates problems NOT USE!
 
-basedir = os.path.dirname(__file__) 
+basedir = os.path.dirname(__file__)
 
 # S5 start GPS, see: https://gwosc.org/archive/S5/
 S5_START_GPS = 815155213
@@ -141,17 +141,17 @@ class Worker(QRunnable):
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self, *args, obj=None, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
-        
+
 
         #----------------------------------------------------
-        # PI : Use a custom font ("Montserrat") across different systems       
-        # The command 'QFontDatabase.addApplicationFont()' loads the font from 
+        # PI : Use a custom font ("Montserrat") across different systems
+        # The command 'QFontDatabase.addApplicationFont()' loads the font from
         # the file specified and makes it available to the application.
         #
         # These lines work correctly with the structure of the resources file
         font_id_1 = QFontDatabase.addApplicationFont(":/fonts/Montserrat_Regular.ttf")
         font_id_2 = QFontDatabase.addApplicationFont(":/fonts/Montserrat_Bold.ttf")
-        
+
 
         # Check if fonts loaded properly
         if font_id_1==-1 or font_id_2== -1:
@@ -175,8 +175,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # PI: state variable to track user actions in Tab 3
         # It is used to distinguish whether the user clicked on "Plot histogram" or "2D scatter plot"
-        self.user_action_tab3 = None  
-    
+        self.user_action_tab3 = None
+
 
         #addition of other options for glitches
         self.comboBox_3.addItem("Koi Fish")
@@ -186,12 +186,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.comboBox_3.addItem("Scattered Light")
         self.comboBox_3.addItem("Scratchy")
         self.comboBox_3.addItem("Tomte")
-        
+
         #adding GEO to the list of detectors
         self.comboBox.addItem("GEO")
 
-        
-        self.GPS_end = 0 
+
+        self.GPS_end = 0
         self.GPS_start = 0
         self.GPS_ref = 0
         #self.event = None
@@ -204,13 +204,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.pushButton_7.clicked.connect(self.save_data)
         self.pushButton_6.clicked.connect(self.load_data)
-        self.pushButton.clicked.connect(self.download_data) 
+        self.pushButton.clicked.connect(self.download_data)
         self.pushButton_2.clicked.connect(self.plot_strain)
         self.pushButton_4.clicked.connect(self.plot_Qscan)
 
 
         # PI: Connect the 'About' Action of the menuBar to the 'show_about' method
-        self.aboutInfo.triggered.connect(self.show_about)  
+        self.aboutInfo.triggered.connect(self.show_about)
 
 
         # PI: Connect the help button of each different tab to the show_help method
@@ -230,10 +230,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.checkBox_knownGW.stateChanged.connect(lambda: self.reset_combobox("knownGW"))
         self.checkBox_knownGlitch.stateChanged.connect(lambda: self.reset_combobox("knownGlitch"))
 
-        
-        self.pushButton_13.clicked.connect(self.display_skymap)        
-            
-                
+
+        self.pushButton_13.clicked.connect(self.display_skymap)
+
+
         self.horizontalSlider.valueChanged.connect(self.set_label_min_t) #this is to decide what happens when the value of the slider changes
         self.horizontalSlider_2.valueChanged.connect(self.set_label_max_t) #this is to decide what happens when the value of the slider changes
         self.threadpool = QThreadPool()
@@ -242,12 +242,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.event_parameters = {
             "Mass 1" : {
                 "db_name" : "mass_1_source",
-                "unit" : r"M$_\odot$",       
+                "unit" : r"M$_\odot$",
             },
             "Mass 2" : {
                 "db_name" : "mass_2_source",
                 "unit" : r"M$_\odot$",
-            },            
+            },
             "Chirp Mass" : {
                 "db_name" : "chirp_mass_source",
                 "unit" : r"M$_\odot$",
@@ -268,15 +268,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 "db_name" : "GPS",
                 "unit" : "s",
             }
-        } 
-        
-                
-                
+        }
+
+
+
         #Add these parameters to the comboBox
         for key in self.event_parameters:
             self.comboBox_5.addItem(key)
             self.comboBox_6.addItem(key)
-        
+
         #I create a dictionary to hold useful parameters to plot the events strain and Qscan
         self.events_dict = {
             "GW150914": {
@@ -300,7 +300,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 "Emax":25
             },
             "GW170817": {
-                "text": "This event is the first direct detection of Gravitational Waves from a Binary Neutron Star merger!\n Note that there is a strong blip glitch at the time of the event in LIGO-Livingston data\n",                
+                "text": "This event is the first direct detection of Gravitational Waves from a Binary Neutron Star merger!\n Note that there is a strong blip glitch at the time of the event in LIGO-Livingston data\n",
                 "fmin": 100,
                 "fmax": 700,
                 "tmin":-2,
@@ -308,7 +308,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 "Qmin":50,
                 "Qmax":100,
                 "Emax":22
-            },            
+            },
             "GW190412": {
                 "text": "This event is a Binary-Black-Hole Coalescence with Asymmetric Masses!\n (3-detectors event, more visible in LIGO-Livingston)\n",
                 "fmin": 30,
@@ -330,7 +330,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 "Emax":25
             },
             "GW190814": {
-                "text": "This event is a possible merger of a Neutron Star with a Black Hole!\n",                
+                "text": "This event is a possible merger of a Neutron Star with a Black Hole!\n",
                 "fmin": 30,
                 "fmax": 300,
                 "tmin":-3,
@@ -338,9 +338,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 "Qmin":4,
                 "Qmax":50,
                 "Emax":25
-            },            
+            },
             "GW190521_074359": {
-                "text": "This event is the Binary Black Hole merger with the highest signal-to-noise ratio in the O3a observing run\n",                
+                "text": "This event is the Binary Black Hole merger with the highest signal-to-noise ratio in the O3a observing run\n",
                 "fmin": 20,
                 "fmax": 500,
                 "tmin":-0.4,
@@ -350,7 +350,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 "Emax":30
             },
             "GW200129_065458": {
-                "text": "This event is the Binary Black Hole merger with the highest signal-to-noise ratio in the O3b observing run\n",                
+                "text": "This event is the Binary Black Hole merger with the highest signal-to-noise ratio in the O3b observing run\n",
                 "fmin": 20,
                 "fmax": 500,
                 "tmin":-0.4,
@@ -368,8 +368,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.comboBox_2.addItem(key)
             self.comboBox_4.addItem(key)
 
-        
-                
+
+
         #I create a dictionary to hold useful parameters to plot the glitches strain and Qscan
         self.glitches_dict = {
           "Blip" : {
@@ -381,7 +381,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             "tmax": 0.3,
             "Qmin":4,
             "Qmax":10,
-            "Emax":150            
+            "Emax":150
           },
           "Koi Fish" : {
             "GPS_central" : 1131409011.24805,
@@ -393,8 +393,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             "Qmin":4,
             "Qmax":10,
             "Emax":150
-          },          
-          "Low Frequency Burst":{ 
+          },
+          "Low Frequency Burst":{
               "GPS_central" : 1133692227.3125,
               "Delta_t" : 16,
               "fmin": 10,
@@ -472,7 +472,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         elif checkbox == "knownGW":
             self.comboBox_3.setCurrentIndex(0)
         elif checkbox == "knownGlitch":
-            self.comboBox_2.setCurrentIndex(0) 
+            self.comboBox_2.setCurrentIndex(0)
 
 
 ############################
@@ -491,7 +491,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 # PI: Show help for the current tab in a new window
 
     def show_help(self):
-        
+
         # Get the current tab
         current_tab = self.get_current_tab()
 
@@ -500,7 +500,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # Bring the existing help window to the front
             self.open_help_windows[current_tab].raise_()
             self.open_help_windows[current_tab].activateWindow()
-            return    
+            return
 
         # Get the help contents for each tab
         help_text = self.help_content()
@@ -522,7 +522,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def help_content(self):
         # Determine which tab is active and get the corresponding help text
         current_tab = self.get_current_tab()  # get the current tab
-        
+
         # print("current tab is:", current_tab)
 
         if current_tab == "Tab 1":
@@ -559,7 +559,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """
         elif current_tab == "Tab 2":
             return"""
-        <div style="font-size: 16px;">    
+        <div style="font-size: 16px;">
             <h2>Plot Data</h2>
             <p>The "Plot Data" tab allows users to visualize the GW data.</p>
 
@@ -574,7 +574,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """
         elif current_tab == "Tab 3":
             return"""
-        <div style="font-size: 16px;">    
+        <div style="font-size: 16px;">
             <h2>Explore GW Event Parameters</h2>
             <p>The "Explore GW event parameters" tab allows users to get parameters of known GW events.</p>
 
@@ -596,7 +596,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 <li><b>Feature 2:</b> Description of feature 2.</li>
                 <li><b>Feature 3:</b> Description of feature 3.</li>
             </ul>
-            """ 
+            """
 
 
 ############################
@@ -608,24 +608,24 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             current_index = self.tabWidget.currentIndex()
 
             if current_index == 0:
-                # print("current tab is:", current_index)    
+                # print("current tab is:", current_index)
                 return "Tab 1"
             elif current_index == 1:
-                # print("current tab is:", current_index)    
+                # print("current tab is:", current_index)
                 return "Tab 2"
             elif current_index == 2:
-                # print("current tab is:", current_index)    
+                # print("current tab is:", current_index)
                 return "Tab 3"
-            
+
 
 ############################
-#PI: Draw the plot window 
+#PI: Draw the plot window
 
-    def create_plot_window(self, fig, *args):   
+    def create_plot_window(self, fig, *args):
         plot_window = AnotherWindow(fig, self)
         plot_window.show()
         return plot_window
-    
+
 
 ############################
 # PI: Method to update plot window content or create it if it does not exist
@@ -653,13 +653,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #since the slider can accept only integers steps I will use a factor 100 to have decimal values
         new_value = str(self.horizontalSlider_2.value()/self.decimals)
         self.label_29.setText(new_value)
-        
+
 
 ############################
 
     def download_data(self):
         #the inputs need to be read inside the method so that every time the button is pushed their value is updated
-        
+
         # finding the content of current item in combo box (detector)
         self.det_label = self.comboBox.currentText()
         #get the detector names from the detector labels
@@ -672,27 +672,27 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         elif(self.det_label=="KAGRA"):
             self.det = "K1"
         elif(self.det_label=="GEO"):
-            self.det = "G1"            
-            
+            self.det = "G1"
+
 #        self.event_long = self.comboBox_2.currentText()
         #the event name is the first part of the event string
 #        self.event = self.event_long.split(" ")[0] #previously a comment was added after the event name
-        
+
         self.glitch = self.comboBox_3.currentText()
 
-        self.GPS_start = 0  
+        self.GPS_start = 0
         self.GPS_end = 0
         self.download_event = False
         self.GPS_ref = 0 #this is used to store the central value of the glitch and the merger time for an event
         self.event = 0
-        
+
         if(self.comboBox_2.currentText()!='None' or self.EventNameTab3_2.text()!=''):
             self.event = self.verify_correct_event_name(self.comboBox_2.currentText(), self.EventNameTab3_2.text())
             #if this fails, the program show not try to download the data
             if (not self.event):
                 return
-            try:    
-                self.GPS_ref = event_gps(self.event)    
+            try:
+                self.GPS_ref = event_gps(self.event)
                 self.GPS_start =  self.GPS_ref + self.doubleSpinBox.value()
                 self.GPS_end =  self.GPS_ref + self.doubleSpinBox_2.value()
                 if self.doubleSpinBox.value()>=0:
@@ -708,15 +708,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 details = f"You can check the list of available events in the website gwosc.org."
                 self.showdialogWarning(text, details)
                 return
-            
-        
+
+
         if (self.det_label == 'None' and self.glitch=='None'):
             text = f"Please select a detector."
             details = f"Use the drop down menu in the section 'Select a Detector' to select a detector for which you want to download the data. If you select an example of known glitch it is not necessary to select a detector."
             self.showdialogWarning(text, details)
             #self.write_log(f"Please select a detector\n")
-            
-        elif ((self.event and self.glitch!='None') or 
+
+        elif ((self.event and self.glitch!='None') or
         (self.event and self.GPSstart.text()!= '') or (self.event and self.GPSend.text()!= '') or
         (self.glitch!='None' and self.GPSstart.text()!= '') or (self.glitch!='None' and self.GPSend.text()!= '')
         ):
@@ -726,20 +726,20 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.showdialogWarning(text, details)
 
         else:
-            
+
             if (not self.event and self.glitch=='None'):
                 #check GPS start
                 self.GPS_start, error_start = self.check_GPS('start')
-        
+
                 #check GPS stop
                 self.GPS_end, error_end = self.check_GPS('stop')
-                
+
                 if (not self.GPS_start or not self.GPS_start):
                     text = error_start + '\n' + error_end
                     details = f"Write the correct GPS times in the 'Select data by time interval' section, or select a known GW event or a known glitch."
                     self.showdialogWarning(text, details)
                     return
-                
+
 
             if (self.event):
                 self.download_event = True
@@ -756,11 +756,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     #if the event is part of the dictionary the setting options saved in the dictionary will be used
                     edict = self.events_dict[self.event] #renaming the dictionary with a shorter name
                     self.write_log(f"{edict['text']}")
-                    
-                    
-                    
+
+
+
                 self.write_log(f"Downloading data for the {self.event} event in {self.det_label} between {self.GPS_start} and {self.GPS_end}\n")
-                
+
                 #setting default values according to the selected event
                 #fmin
                 self.spinBox_3.setProperty("value", edict["fmin"])
@@ -772,9 +772,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.spinBox_2.setProperty("value", edict["Qmax"])
                 #Emax
                 self.spinBox_5.setProperty("value", edict["Emax"])
-                
-                
-                            
+
+
+
             if (self.glitch in self.glitches_dict):
                 #currently all glitches examples are from the same detector
                 if (self.det_label != 'None'):
@@ -789,7 +789,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.GPS_end = self.GPS_ref + gdict["Delta_t"]
                 self.write_log(f"Downloading data for a glitch of type {self.glitch} in {self.det_label}\n between {self.GPS_start} and {self.GPS_end}\n")
 #                self.write_log(f"(Set the glitch field to None if you want to use other options to download the data)\n")
-                
+
                 #setting default values according to the glitch type
                 #fmin
                 self.spinBox_3.setProperty("value", gdict["fmin"])
@@ -802,16 +802,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 #Emax
                 self.spinBox_5.setProperty("value", gdict["Emax"])
 
-                
-                
-                                
-            
+
+
+
+
             if (self.GPS_start != 0 and self.GPS_end !=0 and self.GPS_end<=self.GPS_start):
                 self.write_log(f"GPS stop has to be > GPS start\n")
-        
-                
+
+
             if(self.GPS_start != 0 and self.GPS_end !=0 and self.GPS_end>self.GPS_start):
-                
+
                 #now that I know the GPS start and stop I can set the max and min for the zoom window
                 self.duration = self.GPS_end - self.GPS_start
 
@@ -824,12 +824,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                         self.write_log("- The download was interrupted\n")
                         return
 
-                
+
                 #I also adjust the min max and the steps of the sliders
                 self.modify_zoom_sliders()
 
-                #and I can also set the default value 
-                
+                #and I can also set the default value
+
                 #this is for events
                 if (self.event):
                     #set the min and max only if the data cover the expected range
@@ -838,8 +838,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                         self.horizontalSlider.setProperty("value", self.decimals*edict["tmin"])
                         #tmax
                         self.horizontalSlider_2.setProperty("value", self.decimals*edict["tmax"])
-                
-                
+
+
                 #this is for glitches
                 if (self.glitch in self.glitches_dict):
                     #tmin
@@ -847,14 +847,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     #tmax
                     self.horizontalSlider_2.setProperty("value", self.decimals*gdict["tmax"])
 
-                        
+
                 self.write_log("- Wait, the download is ongoing...\n")
-            
-            
+
+
                 worker = Worker(self.fetch_open_data) # Any other args, kwargs are passed to the run function
                 worker.signals.result.connect(self.print_output)
                 worker.signals.finished.connect(self.thread_complete)
-                worker.signals.progress.connect(self.progress_fn)    
+                worker.signals.progress.connect(self.progress_fn)
 
                 # Execute
                 self.threadpool.start(worker)
@@ -864,7 +864,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 text = f"Please, give correct GPS times to download the data."
                 details = f"This error may occur if you have not selected a correct GPS interval. You can also choose to download data around a known GW event or a glitch."
                 self.showdialogWarning(text, details)
-                
+
 
 ############################
 #Agata: define method to change both the sliders max and min for the zoom but also the steps
@@ -890,15 +890,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if self.data is None:
             self.write_log("Please download data before saving it, or load data from a previously downloaded file.")
             return
-        
+
         print(self.data)
-        
+
         """
         Create a save file dialog with `QFileDialog.getSaveFileName()`.
         - User specifies save location and a suggested filename is provided.
         - Include format extension in the filename (e.g., 'data.hdf5').
         - Supported formats: HDF5, GWF, ASCII (from `gwpy` docs).
-        - Option `QFileDialog.DontConfirmOverwrite` of `QFileDialog` is not set by default. 
+        - Option `QFileDialog.DontConfirmOverwrite` of `QFileDialog` is not set by default.
         -- So overwrite confirmation is prompted and no need for additional filename existence check.
         - Get user's home directory cross-platform: os.path.expanduser('~').
         """
@@ -910,9 +910,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Loop to reopen the save file dialog with the suggested filename if the user changes it
         while True:
             filename, _ = QFileDialog.getSaveFileName(
-                self, 
-                'Save File', 
-                os.path.join(os.path.expanduser('~'), suggested_filename), 
+                self,
+                'Save File',
+                os.path.join(os.path.expanduser('~'), suggested_filename),
                 'HDF5 files (*.hdf5);;GWF files (*.gwf);;ASCII files (*.txt);;All Files (*)'
             )
             if not filename:  # If the user cancels the dialog, return without saving
@@ -925,17 +925,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 response = self.showdialogWarning(text, None, True)
                 if response == QMessageBox.StandardButton.No:
                     # Continue the loop to reopen the save file dialog with the suggested filename
-                    continue           
+                    continue
             break
-                
+
         try:
             # If we have reached this point, the user has already confirmed that they want to overwrite the file.
             if filename.endswith('.hdf5'):
                 # For HDF5 files, use the 'overwrite=True' option to overwrite the file if it exists already.
                 self.data.write(filename, overwrite=True)
 
-            # For other file formats (GWF and TXT), call write() without the overwrite option, as they do not support it.    
-            elif filename.endswith('.txt'):     
+            # For other file formats (GWF and TXT), call write() without the overwrite option, as they do not support it.
+            elif filename.endswith('.txt'):
                 self.data.write(filename)
 
             elif filename.endswith('.gwf'):
@@ -944,21 +944,21 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 # See open PR #1552 in gwpy for more details: https://github.com/gwpy/gwpy/pull/1552
                 channel_name = f"{self.det}:GWDATAPLOTTER-{sample_rate_khz:.0f}KHZ_STRAIN"
                 self.data.name = channel_name
-                print("self.data.name",self.data.name) 
-                print("self.data",self.data) 
+                print("self.data.name",self.data.name)
+                print("self.data",self.data)
 
                 # When trying to save downloaded data to GWF, Agata Trovato reported the following error:
                 # XLAL Error - XLALFrameAddREAL8TimeSeriesProcData: Series start time 1126259461.399902300 is earlier than frame start time 1126259461.399902344
                 # XLAL Error - XLALFrameAddREAL8TimeSeriesProcData: Invalid argument
-                # This probably could be linked to: 
-                # (i) how floating point numbers are handled by the GWF format  
+                # This probably could be linked to:
+                # (i) how floating point numbers are handled by the GWF format
                 # (ii) possible differences in floating point implementation across different processors (e.g. x86_64 vs ARM processors).
                 # Try rounding the GPS start time to set number of decimals to avoid this error.
                 self.GPS_start = round(self.GPS_start, 5)
                 print("Rounded GPS start time:", self.GPS_start)
 
                 self.data.write(filename)
-                # print('Here is how the data looks after the channel name hack\n', self.data)    
+                # print('Here is how the data looks after the channel name hack\n', self.data)
 
             self.write_log(f"Data saved to {filename}")
 
@@ -971,20 +971,20 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         '''
         This method is used to check if the GPS times given by the user are reasonable
         It will write error messages in the log if the GPS format is not correct
-        It will always return a value GPS_out, which is zero if the GPS format is not correct 
+        It will always return a value GPS_out, which is zero if the GPS format is not correct
         '''
-        
+
         GPS_out = 0
         error_code = ''
-        
-        
+
+
         if label == 'start':
             GPS_in = self.GPSstart.text()
         if label == 'stop':
             GPS_in = self.GPSend.text()
-            
+
         if GPS_in:
-            
+
             try:
                 self.write_log(f"GPS {label} requested: {GPS_in} (UTC: {from_gps(GPS_in)})")
                 GPS_out = float(GPS_in)
@@ -996,7 +996,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 error_code = f"Value error for GPS {label}: "+str(ve)
                 #self.write_log(f"Value error for GPS {label}: "+str(ve))
         else:
-            #self.write_log(f"Fill the GPS {label}")    
+            #self.write_log(f"Fill the GPS {label}")
             error_code = f"Fill the GPS {label}"
         return GPS_out, error_code
 
@@ -1017,7 +1017,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if not filename:  # If the user cancels the dialog, return without loading
             return
 
-        #Agata: if the user loads data from a file even if previously data for an event have been downloaded 
+        #Agata: if the user loads data from a file even if previously data for an event have been downloaded
         #the self.download_event needs to be set to false to avoid wrong titles in the plots
         self.download_event = False
         try:
@@ -1029,26 +1029,26 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             # Extract the detector name from the filename
             #
-            # To avoid errors about labels missing raised by plot_strain() and plot_Qscan() methods, we need to ensure that the 
+            # To avoid errors about labels missing raised by plot_strain() and plot_Qscan() methods, we need to ensure that the
             # detector name is set.
             #
             # In the case of loading data previously downloaded with the app:
             # - the detector name is not saved in the HDF5 file internally (at least gwpy does not save it with the write() method)
             # - we cannot be certain that the user saved the data following the naming convention of GWOSC in order to get the detector name from the filename
-            # 
-            # With that in mind, the following extraction assumes a filename that adopts the suggested naming convention: 
+            #
+            # With that in mind, the following extraction assumes a filename that adopts the suggested naming convention:
             # 'DETECTOR_GWDATAPLOTTER_SAMPLERATE-GPSstart-DURATION'
-            # 
+            #
             base_name = filename.split("/")[-1]
             self.det = base_name.split("_")[0].split("_")[0]
             print(self.det)
 
             # Set needed options for plotting when loading data
             self.set_options_loaded_data()
-            
+
             #check for Nans
             self.check_for_nans()
-            
+
 
         # Trying to read HDF5 or TXT files downloaded from GWOSC will raise a ValueError
         except ValueError:
@@ -1075,18 +1075,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.check_for_nans()
 
 
-            # Load TXT files downloaded from GWOSC website    
+            # Load TXT files downloaded from GWOSC website
             elif filename.endswith(".txt"):
-        
+
                 # Read the strain data points
                 # The first 3 rows of the txt file start with '#' and are automatically skipped (treated as comments).
                 strain_data_points=np.loadtxt(filename)
                 print(strain_data_points)
-                
+
 
                 # Read separately the first lines containing useful info
                 with open(filename) as f:
-                    for i, line in enumerate(f):  
+                    for i, line in enumerate(f):
                         if i==0: # Contains GW event name and detector name, not needed here
                             continue
                         elif i==1: # Contains the sample rate
@@ -1094,8 +1094,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                         elif i==2: # Contains the GPS start time and the duration of the data
                             GPSstart = int(line.split()[3])
                         else:
-                            break        
-               
+                            break
+
 
                 # Create the Timeseries object using the information read from the TXT file
                 self.data = TimeSeries(strain_data_points, sample_rate=freq, epoch=GPSstart)
@@ -1109,13 +1109,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 print(self.det)
 
                 # Set needed options for plotting when loading data
-                self.set_options_loaded_data()  
+                self.set_options_loaded_data()
 
                 #check for Nans
                 self.check_for_nans()
 
 
-        # Trying to read GWF files will raise a TypeError 
+        # Trying to read GWF files will raise a TypeError
         # This happens because an additional argument is needed in TimeSeries.read(), i.e. the channel name.
         except TypeError:
 
@@ -1130,22 +1130,22 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             else:
                 self.write_log(f"Seems like the file is not from GWOSC or the App. Support for this case is not implemented yet.")
                 return
-            
+
             # Construct the channel name from the filename
             print(list_strings)
             print(len(list_strings))
             if len(list_strings)==3:    # for filenames like 'H1_GWDATAPLOTTER_4KHZ-1242459841-32.gwf'
                 # the channel name construction convention is known from the save_data() method:
                 # i.e. 'DETECTOR:GWDATAPLOTTER-SAMPLERATE_STRAIN'
-                channel_name = list_strings[0]+":"+list_strings[1]+"-"+list_strings[2]+"_STRAIN"    
+                channel_name = list_strings[0]+":"+list_strings[1]+"-"+list_strings[2]+"_STRAIN"
             if len(list_strings)==4:
                 channel_name = list_strings[0]+":"+list_strings[1]+"-"+list_strings[2]+"_"+list_strings[3]+"_STRAIN"
             if len(list_strings)==5:
-                channel_name = list_strings[0]+":"+list_strings[1]+"-"+list_strings[3]+"_"+list_strings[4]+"_STRAIN"    
+                channel_name = list_strings[0]+":"+list_strings[1]+"-"+list_strings[3]+"_"+list_strings[4]+"_STRAIN"
             print(channel_name)
 
 
-            # Load the GWF file using the reconstructed channel name as argument    
+            # Load the GWF file using the reconstructed channel name as argument
             self.data = TimeSeries.read(filename, channel=channel_name)
             self.write_log(f"Data loaded from {filename}")
             print(self.data)
@@ -1156,15 +1156,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             print(self.det)
 
             # Set needed options for plotting when loading data
-            self.set_options_loaded_data()  
-            
+            self.set_options_loaded_data()
+
             #check for Nans
             self.check_for_nans()
 
         except Exception as e:
             self.write_log(f"Error loading data: {str(e)}")
 
-        
+
 ############################
 # PI: method to set the detector label based on the detector name
 
@@ -1201,7 +1201,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.duration = self.GPS_end - self.GPS_start
             print(f"Duration of loaded data: {self.duration}")
             self.modify_zoom_sliders()
-            
+
             # The option for self.glitch is not read from the user options as done when downloading data.
             # Set self.glitch to None to avoid errors in the plot_Qscan() method
             self.glitch = None
@@ -1222,11 +1222,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             #remove the selection of the whitening
             self.checkBox_5.setChecked(False)
             #remove the frequency selection
-            self.checkBox_7.setChecked(True)            
+            self.checkBox_7.setChecked(True)
             #remove the zoom in time
             self.checkBox.setChecked(False)
-                       
-    
+
+
             #we could add specify which are the intervals of "good data" in the file
             text_to_be_print +=f"The segments of available data in the file are in the GPS intervals:\n"
             time_array = np.arange(start=self.data.t0.value, stop=self.data.t0.value + (self.data.dt.value*len(self.data.value)), step=self.data.dt.value)
@@ -1234,13 +1234,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             for no_nans in list_of_segments:
                 time_no_nans = time_array[no_nans]
                 text_to_be_print +=f"[{time_no_nans[0]},{time_no_nans[-1]+self.data.dt.value})\n"
-            self.write_log(text_to_be_print)    
+            self.write_log(text_to_be_print)
 
 
 ############################
 
     def write_log(self, text, textB = None):
-        #this method just writes into the logger 
+        #this method just writes into the logger
         #by default it writes in the logger of the first tab
         if textB == None:
             textB = self.textBrowser
@@ -1266,7 +1266,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         previous_text = self.textBrowser_2.toPlainText()
         if text in previous_text:
             is_there = True
-        return is_there    
+        return is_there
 
 
 ############################
@@ -1274,8 +1274,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def write_log_event(self, text):
         #this method just writes into the logger of the second tab
         self.write_log(text,self.textBrowser_3)
-        
-                
+
+
 ############################
 
     def progress_fn(self, n):
@@ -1295,13 +1295,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def thread_complete(self):
         #this needs to be improved or eliminated
         print("THREAD COMPLETE!")
- 
+
 
 ############################
 # PI: instruct a specific code block to be executed only AFTER the data has been downloaded
 
     def catalogs_download_finished(self):
-            
+
             print("Download complete!")
 
             # PI: depending on what the user wants to do, execute the corresponding code block
@@ -1355,30 +1355,30 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                         # Get event's GPS value (not included in 'default_parameters' list of dictionaries)
                         value = event['gps']
-                        
+
                         if value is None:
                             print(f"Event {event['name']} missing parameter: {db_name}")
-                        else:    
+                        else:
                             param.append(value)
             else:
 
                 for c in self.catalogs:
 
                     for event in c:
-                        
+
                         # Get parameter value from the 'default parameters'
                         value = self.get_parameter_value(event['default_parameters'], db_name)
-                        
+
                         if value is None:
                             print(f"Event {event['name']} missing parameter: {db_name}")
                         else:
                             param.append(value)
-                            
-                
+
+
 
             fig = Figure()
-            ax = fig.add_subplot()        
-            
+            ax = fig.add_subplot()
+
             if self.checkBox_3.isChecked():
                 self.write_log_event("\nFor the histogram, selecting the 'Log x scale' will actually allow you to plot the log10 of the parameter")
                 ax.hist(np.log10(param), label='all events', bins=20)
@@ -1407,11 +1407,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     text = f"The value of {key} will not be highlighted on the plot for the selected event."
                     details = f"The parameter {key} for {self.event_tab3} is not defined."
                     self.showdialogWarning(text, details)
-                
+
             ax.legend()
 
-            
-            # PI: Create plot window identifier (used to update the plotting windows or avoid duplicates) 
+
+            # PI: Create plot window identifier (used to update the plotting windows or avoid duplicates)
             window_id = 'histogram_plot'
 
             # Update the plot_window with the new figure (or create it if it does not exist)
@@ -1441,7 +1441,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 # Get parameter values depending on which parameter is 'GPS' and which is not
                 if db_name1 != 'GPS' and db_name2 != 'GPS':
                     value1 = self.get_parameter_value(event['default_parameters'], db_name1)
-                    value2 = self.get_parameter_value(event['default_parameters'], db_name2)    
+                    value2 = self.get_parameter_value(event['default_parameters'], db_name2)
                 elif db_name1 == 'GPS' and db_name2 != 'GPS':
                     value1 = event['gps']
                     value2 = self.get_parameter_value(event['default_parameters'], db_name2)
@@ -1461,12 +1461,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     print(f"Event {event['name']} missing parameter(s): "
                         f"{db_name1 if value1 is None else ''} "
                         f"{db_name2 if value2 is None else ''}")
-          
-        
+
+
         fig = Figure()
-        ax = fig.add_subplot()        
-        
-        ax.scatter(param1, param2, label='all events', alpha=0.8)                  
+        ax = fig.add_subplot()
+
+        ax.scatter(param1, param2, label='all events', alpha=0.8)
         ax.set_xlabel(key1+" ["+self.event_parameters[key1]['unit']+"]")
         ax.set_ylabel(key2+" ["+self.event_parameters[key2]['unit']+"]")
         if self.checkBox_3.isChecked():
@@ -1474,23 +1474,23 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if self.checkBox_4.isChecked():
             ax.set_yscale('log')
         if self.checkBox_2.isChecked():
-            #check that the values for the parameters are numbers for the selected event 
+            #check that the values for the parameters are numbers for the selected event
             try:
                 if (self.event_parameters[key1]['value'] and self.event_parameters[key2]['value']):
                     ax.scatter(self.event_parameters[key1]['value'], self.event_parameters[key2]['value'], edgecolors='tab:orange', facecolor="none", label=self.event_tab3)
                 else:
                     text = f"The values of {key1} and {key2} will not be highlighted on the plot for the selected event."
                     details = f"One among the parameters {key1} and {key2} for {self.event_tab3} is not defined."
-                    self.showdialogWarning(text, details)    
+                    self.showdialogWarning(text, details)
             except KeyError:
                 text = f"The values of {key1} and {key2} will not be highlighted on the plot for the selected event."
                 details = "Use the button 'Get event parameters' to get the value of the parameters for the event and then plot the histogram again."
                 self.showdialogWarning(text, details)
 
         ax.legend()
-    
-        # PI: Create plot window identifier (used to update the plotting windows or avoid duplicates) 
-        window_id = 'scatter_plot'          
+
+        # PI: Create plot window identifier (used to update the plotting windows or avoid duplicates)
+        window_id = 'scatter_plot'
 
         # Update the plot_window with the new figure (or create it if it does not exist)
         self.update_plot_window(fig, window_id)
@@ -1507,16 +1507,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             for e in events_with_repetitions:
                 if (e[:2]=="GW" and e[:-3] not in events):
                     events.append(e[:-3])
-            
+
             #Check that there are not duplicates of the same event
             #A way to check is verifying that a v1 exists for all events
             events = [e for e in events if e+"-v1" in events_with_repetitions]
-            
+
             if len(events):
                 output+="Note that the data requested contains the following events:\n"
                 for e in events:
                     output+=e+" at GPS time: "+str(event_gps(e))+"\n"
-                    
+
         try:
             self.data = TimeSeries.fetch_open_data(self.det, self.GPS_start,self.GPS_end)
         except ValueError as ve:
@@ -1531,8 +1531,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             return f"Error: {te}. This could be due to a momentary connection problem or maintenance period, try later."
         except Exception as e:
             return str(e)
-        
-                
+
+
         progress_callback.emit(100)
         return output+"\n- Done!\n"
 
@@ -1567,10 +1567,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if self.checkBox_5.isChecked():
             do_whiten = True
             label_w = "whitened"
-        if self.checkBox_7.isChecked():    
+        if self.checkBox_7.isChecked():
             do_freq_sel = False
             bp_label = ""
-        if self.checkBox.isChecked():    
+        if self.checkBox.isChecked():
             do_zoom = True
         return do_whiten,do_freq_sel,fmin,fmax,do_zoom,tmin,tmax, label_w, bp_label
 
@@ -1581,7 +1581,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         text_to_be_printed = "-----------------------------\n"
         text_to_be_printed += f"Tips for plotting this {name} (default values):\n"
         text_to_be_printed +=" - We suggest to whiten the data\n"
-        text_to_be_printed +=" - select a f range between " + str(gdict["fmin"])+ " and " + str(gdict["fmax"]) + " Hz\n"        
+        text_to_be_printed +=" - select a f range between " + str(gdict["fmin"])+ " and " + str(gdict["fmax"]) + " Hz\n"
         text_to_be_printed +=" - and zoom in time in ("+str(gdict["tmin"])+","+str(gdict["tmax"])+") s around t_center\n"
         text_to_be_printed +=" - For the Qscan options:\n"
         text_to_be_printed +=" - Q between "+str(gdict["Qmin"])+" and "+str(gdict["Qmax"])+"\n"
@@ -1591,36 +1591,37 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #verify if the text is already there, and add it to the logger only if it is not there already
         is_there = self.check_if_text_is_already_there(text_to_be_printed)
         if not is_there:
-            self.write_log_plot(text_to_be_printed)        
-            
-        
+            self.write_log_plot(text_to_be_printed)
+
+
 ############################
 
     def plot_strain(self):
+
         #if the data have not been downloaded show a warning
         if self.data is None:
             warn_text = f"Please, go to the previous tab and download the data."
             warn_details = f"In the first tab you can download the data or load them from a file already saved locally."
             self.showdialogWarning(warn_text, warn_details)
             return
-            
-        #print tips for plotting in case of known event or glitch            
+
+        #print tips for plotting in case of known event or glitch
         if self.event in self.events_dict:
-            self.tips_for_plotting(self.events_dict[self.event], 'GW event')            
+            self.tips_for_plotting(self.events_dict[self.event], 'GW event')
         elif self.glitch in self.glitches_dict:
-            self.tips_for_plotting(self.glitches_dict[self.glitch], 'glitch')    
-        
+            self.tips_for_plotting(self.glitches_dict[self.glitch], 'glitch')
+
         do_whiten,do_freq_sel,fmin,fmax,do_zoom,tmin,tmax, label_w, bp_label = self.check_common_plot_options()
         if (self.GPS_end - self.GPS_start)<2 and do_whiten:
             warn_text = f"At least 2 seconds of data are required to whiten them."
             warn_details = f"Use the previous tab to download a segment of data at least 2 seconds long or disable the whiten option in the Plot settings."
             self.showdialogWarning(warn_text, warn_details)
         else:
-            try:    
+            try:
                 start_segment = self.GPS_start
                 data_to_be_plot = self.data
-                
-                if do_whiten:  
+
+                if do_whiten:
                     white_data = data_to_be_plot.whiten()
                     data_to_be_plot = white_data
 
@@ -1638,8 +1639,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     data_to_be_plot = bp_cropped
                     #change allowed times for zoom in time because of the crop
                     half = self.decimals/2
-                    self.horizontalSlider.setMinimum(int(-(self.duration)*half+0.1*self.decimals)) 
-                    self.horizontalSlider_2.setMaximum(int(self.duration*half-0.1*self.decimals)) 
+                    self.horizontalSlider.setMinimum(int(-(self.duration)*half+0.1*self.decimals))
+                    self.horizontalSlider_2.setMaximum(int(self.duration*half-0.1*self.decimals))
                     #add a warning in the logger if it is not already there
                     text_to_be_printed = "Data have been cropped by 0.1 s at both ends to avoid border effects due to the bandpass filter"
                     is_there = self.check_if_text_is_already_there(text_to_be_printed)
@@ -1658,18 +1659,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 if (self.GPS_ref):
                     ax.set_epoch(self.GPS_ref)
                 else:
-                    ax.set_epoch(start_segment)    
-            
+                    ax.set_epoch(start_segment)
+
                 if (self.download_event):
                     ax.set_title(f'{self.det_label} {label_w} strain data around {self.event}{bp_label}')
                 else:
-                    ax.set_title(f'{self.det_label} {label_w} strain data{bp_label}')    
+                    ax.set_title(f'{self.det_label} {label_w} strain data{bp_label}')
                 ax.set_ylabel('Amplitude [strain]')
-                
-                # PI: Create plot window identifier (used to update the plotting windows or avoid duplicates) 
+
+                # PI: Create plot window identifier (used to update the plotting windows or avoid duplicates)
                 window_id = 'strain_plot'
 
                 # Update the plot_window with the new figure (or create it if it does not exist)
+
                 self.update_plot_window(fig, window_id)
 
 
@@ -1692,22 +1694,22 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             warn_details = f"In the first tab you can download the data or load them from a file already saved locally."
             self.showdialogWarning(warn_text, warn_details)
             return
-                    
-        #print tips for plotting in case of known event or glitch            
+
+        #print tips for plotting in case of known event or glitch
         if self.event in self.events_dict:
-            self.tips_for_plotting(self.events_dict[self.event], 'GW event')            
+            self.tips_for_plotting(self.events_dict[self.event], 'GW event')
         elif self.glitch in self.glitches_dict:
-            self.tips_for_plotting(self.glitches_dict[self.glitch], 'glitch')    
-        
+            self.tips_for_plotting(self.glitches_dict[self.glitch], 'glitch')
+
         Qmin=self.spinBox.value()
         Qmax=self.spinBox_2.value()
         set_vmax = False
         if self.checkBox_8.isChecked():
             set_vmax = True
             vmax = self.spinBox_5.value()
-        
+
         do_whiten,do_freq_sel,fmin,fmax,do_zoom,tmin,tmax, label_w, bp_label  = self.check_common_plot_options()
-        
+
         start_segment = self.GPS_start
         end_segment = self.GPS_end
         if do_zoom:
@@ -1716,30 +1718,30 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             start_segment = t_center+tmin
             end_segment = t_center+tmax
 
-        
+
         if (self.GPS_end - self.GPS_start)<2 and do_whiten:
             warn_text = f"At least 2 seconds of data are required to whiten them."
             warn_details = f"You can use the previous tab to download a segment of data long at least 2 seconds or disable the whiten option in the Plot settings."
             self.showdialogWarning(warn_text, warn_details)
-        else:    
-          try:    
-            
-              
+        else:
+          try:
+
+
             if do_freq_sel:
                 qscan = (self.data).q_transform(whiten=do_whiten, frange=(fmin, fmax),outseg=(start_segment, end_segment),qrange=(Qmin,Qmax))
             else:
                 qscan = (self.data).q_transform(whiten=do_whiten,outseg=(start_segment, end_segment),qrange=(Qmin,Qmax))
-            
+
             if set_vmax:
-                fig = qscan.plot(vmax=vmax)    
-            else:    
+                fig = qscan.plot(vmax=vmax)
+            else:
                 fig = qscan.plot()
             ax = fig.gca()
             if (self.GPS_ref):
                 ax.set_epoch(self.GPS_ref)
             else:
-                ax.set_epoch(start_segment)    
-            
+                ax.set_epoch(start_segment)
+
 #            ax.set_epoch(start_segment)
 
             ax.colorbar(label="Normalised energy", cmap='viridis')
@@ -1752,7 +1754,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     ax.set_title(f'{self.det_label} {label_w} strain data')
 
 
-            # PI: Create plot window identifier (used to update the plotting windows or avoid duplicates) 
+            # PI: Create plot window identifier (used to update the plotting windows or avoid duplicates)
             window_id = 'qscan_plot'
 
             # Update the plot_window with the new figure (or create it if it does not exist)
@@ -1774,7 +1776,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def showdialogWarning(self, text="Additional information", details = None, response=False, title = "Warning"):
         msg = QMessageBox()
-        
+
         if title == "Warning":
             msg.setIcon(QMessageBox.Icon.Warning)
             msg.setWindowTitle("Warning")
@@ -1796,8 +1798,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         custom_font = QFont(self.custom_font)
         custom_font.setPointSize(13) # Set the font size (just for the dialog widow)
         msg.setFont(custom_font)
-        
-        
+
+
         if(response):
             msg.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
             msg.setDefaultButton(QMessageBox.StandardButton.No)
@@ -1822,7 +1824,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             event_ok = True
         elif (textbox != "" and dropdown == "None"):
             event_name = textbox
-            
+
             #check if the user have written the event name with lower case
             if (event_name[:2] == 'gw'):
                 event_name = 'GW' + event_name[2:]
@@ -1844,23 +1846,23 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         #the method verify_correct_event_name will return 0 if the event name is not correct
         if event:
-            
+
             self.event_tab3 = event
             try:
 
                 # ----------------------------------------
                 # PI: API v2 logic to get event parameters
-                
-                # Get event with the '{event_name}@GWTC' trick 
-                # This returns the highest version of the event in the GWTC-cumulative catalog, 
+
+                # Get event with the '{event_name}@GWTC' trick
+                # This returns the highest version of the event in the GWTC-cumulative catalog,
                 # filtering out community catalogs
                 event_url = f"https://gwosc.org/api/v2/event-versions/{self.event_tab3}@GWTC?include-default-parameters"
                 stored_event = fetch_json(event_url)
-                
+
 
                 # Detail-url of the highest version of the event in the GTWC-cumulative catalog
                 event_detail_url = stored_event['detail_url']
-                
+
 
                 # Get the version-specific of the event (need this to get the parameters_url)
                 event_specific_version = fetch_json(event_detail_url)
@@ -1872,8 +1874,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 parameters = list(produce_fetched_objects(params_url))
 
 
-                # Search for the default (preferred) PE results in the dictionary 
-                # of the different PEs available 
+                # Search for the default (preferred) PE results in the dictionary
+                # of the different PEs available
                 for p in parameters:
                     if p.get('is_preferred'):
                         event_default_pe = p
@@ -1901,18 +1903,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                             print(f"Parameter '{db_name}' not found in event data.")
                             entry['value'] = None
                             unit = upper = lower = None
-                        
+
                         text_to_be_printed += f"- {key}: {entry['value']} (+{upper}, {lower}) [{unit}]\n"
                     else:
                         # GPS case
                         entry['value'] = stored_event['gps']
                         text_to_be_printed += f"- {key}: {entry['value']} [{entry['unit']}] (UTC: {from_gps(entry['value'])})\n"
-  
+
                 # END: API v2 logic to get event parameters
                 # ----------------------------------------
 
 
-    
+
 
                 # ----------------------------------------------
                 # PI: get skymap and PE links following API v2 logic
@@ -1935,7 +1937,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                         text_to_be_printed += f"\nNo skymap and PE samples links found for the selected PE result."
                 else:
                     text_to_be_printed += f"\nNo 'combined' PE result found for {self.event_tab3} to get the skymap and PE samples links."
-                
+
                 # END: get skymap and PE links following API v2 logic
                 # ----------------------------------------
 
@@ -1945,7 +1947,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             except ValueError:
                 self.write_log_event("\nVerify that you have correctly written the event name. You can check the list of all published events in the website gwosc.org")
             # PI: this is (probably) not triggered anymore with the new API v2
-            except KeyError:    
+            except KeyError:
                 #This happen probably if the links to the PE or skymaps are not found
                 #Not to sure what to write in this case
                 self.write_log_event(text_to_be_printed)
@@ -1975,7 +1977,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 # get url with 'requests'
                 response = requests.get(f"https://gracedb.ligo.org/api/superevents/{gracedb_id}/files/?format=json")
-                # print('response status:', response.status_code) # for checking purposes: 200 means OK 
+                # print('response status:', response.status_code) # for checking purposes: 200 means OK
                 data = response.json()
                 # print(data) # for checking purposes
                 for key in data:
@@ -1984,7 +1986,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 # print('list of available png:', list_available_png) # for checking purposes
 
 
-                # If the list of available PNG files is empty, it means that no skymap is present on GraceDB. 
+                # If the list of available PNG files is empty, it means that no skymap is present on GraceDB.
                 # In this case we get the skymap from the gwcat database.
                 if not list_available_png:
                     self.write_log_event("No PNG files available from GraceDB. Getting skymap from the gwcat database...")
@@ -2006,52 +2008,52 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                             skymap_file = f"{png}"
                             break
                         else:
-                            link_skymap = f"https://gracedb.ligo.org/apiweb/superevents/{gracedb_id}/files/{png}"    
+                            link_skymap = f"https://gracedb.ligo.org/apiweb/superevents/{gracedb_id}/files/{png}"
                             skymap_file = f"{png}"
                     found_gracedb = True
 
 
                 print('link_skymap',link_skymap)
                 print('found_gracedb',found_gracedb)
-            
+
 
                 warn_text = f"You will now choose the directory where to save the {skymap_file}. The file will be displayed after you save it."
                 warn_details = f"You can also retrieve the same file at the url {link_skymap}"
                 if(not found_gracedb):
                     warn_text += "\nFor this event the original skymap provided from the LVK via the gracedb website cannot be downloaded so an alternative is provided."
                 self.showdialogWarning(warn_text, warn_details)
-                
-                
+
+
                 #open. window to choose where to save the file
-                
+
                 # Loop to reopen the save file dialog with the suggested filename if the user changes it
                 while True:
                     filename, _ = QFileDialog.getSaveFileName(
-                               self, 
-                               'Save File', 
-                               os.path.join(os.path.expanduser('~'), skymap_file), 
+                               self,
+                               'Save File',
+                               os.path.join(os.path.expanduser('~'), skymap_file),
                                'png files (*.png)'
                            )
                     if not filename:  # If the user cancels the dialog, return without saving
                         return
                     break
-                # print("filename",filename)     # for checking purposes         
-                
+                # print("filename",filename)     # for checking purposes
+
 
                 # Download the skymap file
                 response_skymap_file = requests.get(link_skymap)
                 with open(filename, 'wb') as file:
                     file.write(response_skymap_file.content)
 
-    
+
 
                 dialog = QtWidgets.QDialog()
                 lay = QtWidgets.QVBoxLayout(dialog)
-            
+
                 title = QtWidgets.QLabel()
                 title.setText(f"Skymap for {self.event_tab3}")
                 lay.addWidget(title)
-            
+
                 label = QtWidgets.QLabel()
                 lay.addWidget(label)
                 pixmap = QtGui.QPixmap(filename)
@@ -2061,12 +2063,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 map_height = pixmap.rect().height()
                 if (map_height>1000):
                     pixmap = pixmap.scaled(QSize(int(map_width/5), int(map_height/5)))
-            
+
                 label.setPixmap(pixmap)
                 dialog.exec()
             except Exception as e:
                 self.write_log_event("Something went wrong!")
-                self.write_log_event(f"Type of the exception: {type(e)}") 
+                self.write_log_event(f"Type of the exception: {type(e)}")
                 self.write_log_event(f"This error occurred: {e}")
 
 
@@ -2077,41 +2079,41 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.write_log_event("\nDownloading parameters for all confident detections published by the LIGO-Virgo-KAGRA collaborations...\n")
         worker = Worker(self.download_catalogs)
         worker.signals.result.connect(self.print_output_tab3)
-        # worker.signals.finished.connect(self.thread_complete) 
+        # worker.signals.finished.connect(self.thread_complete)
         worker.signals.finished.connect(self.catalogs_download_finished)
         worker.signals.progress.connect(self.progress_fn)
         # Execute
         self.threadpool.start(worker)
-        
-        
 
-        
+
+
+
 
 ############################
 
     def download_catalogs(self, progress_callback):
         output = "Catalogs downloaded:\n"
 
-        # use the cumulative GWTC catalog 
+        # use the cumulative GWTC catalog
         # see: https://gwosc.org/eventapi/html/GWTC/
-        catalog_list_names = ['GWTC'] 
-        
+        catalog_list_names = ['GWTC']
+
         self.catalogs = []
         for catalog in catalog_list_names:
 
             # PI: API v2 logic
-            catalog_url = f"https://gwosc.org/api/v2/catalogs/{catalog}/events?lastver=true&include-default-parameters=true"    
-            
-            
+            catalog_url = f"https://gwosc.org/api/v2/catalogs/{catalog}/events?lastver=true&include-default-parameters=true"
+
+
             # Convert the generator object to  a list
-            # This is a workaround to address the exhaustion of the generator object 
+            # This is a workaround to address the exhaustion of the generator object
             # after the first complete iteration and avoid having to re-fetch the catalogs.
             # (see definition of 'produce_fetched_objects' in 'v2.py' at /gwosc/api)
             catalog_events = list(produce_fetched_objects(catalog_url))
 
             output += catalog
             output += "\n"
-            self.catalogs.append(catalog_events)        
+            self.catalogs.append(catalog_events)
 
         progress_callback.emit(100)
         return output+"\n- Done!\n"
@@ -2127,7 +2129,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 ############################
 
     def plot_parameter_histogram(self):
-        
+
         self.user_action_tab3 = "plot_histogram"
         key = self.comboBox_5.currentText()
 
@@ -2144,7 +2146,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 ############################
 
     def plot_parameter_scatter(self):
-        
+
         self.user_action_tab3 = "2D_scatter_plot"
         key1 = self.comboBox_5.currentText()
         key2 = self.comboBox_6.currentText()
@@ -2154,13 +2156,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         elif (self.catalogs is None):
             # PI: download catalogs if they are not there already
             self.get_catalogs()
-        else:  
+        else:
             # PI: e.g if the catalogs are downloaded already but we want to plot some other pair of parameters
             self.plot_2D_scatter_after_download()
 
 
 
-#----------------------------------------------------            
+#----------------------------------------------------
 class AnotherWindow(QtWidgets.QWidget):
     """
     This "window" is a QWidget. If it has no parent,
@@ -2172,7 +2174,7 @@ class AnotherWindow(QtWidgets.QWidget):
 
         # Set the main_window as the parent of the plotting_window
         # This is needed if we want the separate plotting window to close too when the main window is closed.
-        super().__init__(main_window)
+        super().__init__(None)
 
         # Set the window title
         self.setWindowTitle("Plotting window")
@@ -2182,30 +2184,41 @@ class AnotherWindow(QtWidgets.QWidget):
         # This is needed , because the window is created as a child of the main window
         # (otherwise it does not appear at all)
         self.setWindowFlag(QtCore.Qt.WindowType.Window)
-        
+
 
         self.layout = QtWidgets.QVBoxLayout()
         self.setLayout(self.layout)
         self.canvas = FigureCanvas(fig) # create canvas
         self.layout.addWidget(self.canvas)   # add canvas to layout
- 
+
         # Create and add toolbar
         toolbar = NavigationToolbar(self.canvas, self)
         self.layout.addWidget(toolbar)
 
-    def update_plot(self, fig):    
+    def update_plot(self, fig):
+        # Remove the old toolbar
+        old_toolbar = self.layout.itemAt(1).widget()
+        self.layout.removeWidget(old_toolbar)
+        old_toolbar.hide()
+        old_toolbar.deleteLater()
+
         # Remove the old canvas
         self.layout.removeWidget(self.canvas)
+        self.canvas.hide()
         self.canvas.deleteLater()
 
-        # Add the new canvas
+        # Create the new canvas
         self.canvas = FigureCanvas(fig)
-        # self.layout.addWidget(self.canvas)
-        # PI: Insert the new canvas at the top of the layout, ensuring that the navigation toolbar remains at the bottom    
-        self.layout.insertWidget(0, self.canvas) 
-        self.canvas.draw()    
+        self.layout.insertWidget(0, self.canvas)
 
-#----------------------------------------------------            
+        # Create a new toolbar linked to the new canvas
+        toolbar = NavigationToolbar(self.canvas, self)
+        self.layout.addWidget(toolbar)
+
+        # Draw the updated figure
+        self.canvas.draw()
+
+#----------------------------------------------------
 # PI: class to display help text in a new window
 class HelpWindow(QtWidgets.QWidget):
     """
@@ -2216,7 +2229,7 @@ class HelpWindow(QtWidgets.QWidget):
     def __init__(self, help_text, main_window):
         # Set the main_window as the parent of the help_window
         # This is needed if we want the separate help window to close too when the main window is closed.
-        super().__init__(main_window) 
+        super().__init__(main_window)
 
         # Set the window title
         self.setWindowTitle("Help window")
@@ -2244,17 +2257,17 @@ class HelpWindow(QtWidgets.QWidget):
 
         # Create QTextBrowser instance
         helpbrowser = QtWidgets.QTextBrowser()
-        
+
         # Set the help text
         # helpbrowser.setText(help_text)
         helpbrowser.setHtml(help_text)
-        
+
         # Add the QTextBrowser to the layout
         layout = QtWidgets.QVBoxLayout()
         layout.addWidget(helpbrowser)
         self.setLayout(layout)
-        
-        
+
+
 #----------------------------------------------------
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
