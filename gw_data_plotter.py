@@ -2171,9 +2171,11 @@ class AnotherWindow(QtWidgets.QWidget):
 
     # def __init__(self, fig, plot_id, main_window):
     def __init__(self, fig, main_window):
-
-        # Set the main_window as the parent of the plotting_window
-        # This is needed if we want the separate plotting window to close too when the main window is closed.
+        # MB: Create the plotting window without a Qt parent.
+        # On Ubuntu/WSL, using main_window as parent caused interaction
+        # issues when plot windows were closed or minimized.
+        # Using None allows the main window to remain interactive.
+        # Tested with repeated Strain and Q-scan plots.
         super().__init__(None)
 
         # Set the window title
@@ -2196,7 +2198,8 @@ class AnotherWindow(QtWidgets.QWidget):
         self.layout.addWidget(toolbar)
 
     def update_plot(self, fig):
-        # Remove the old toolbar
+        # MB: Replace both the canvas and its navigation toolbar
+        # when updating a plot, so the toolbar references the new canvas.
         old_toolbar = self.layout.itemAt(1).widget()
         self.layout.removeWidget(old_toolbar)
         old_toolbar.hide()
