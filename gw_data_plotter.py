@@ -1701,8 +1701,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         elif self.glitch in self.glitches_dict:
             self.tips_for_plotting(self.glitches_dict[self.glitch], 'glitch')
 
-        Qmin=self.spinBox.value()
-        Qmax=self.spinBox_2.value()
+        Qmin = self.spinBox.value()
+        Qmax = self.spinBox_2.value()
+
+        # MB: Validate Q range before computing the Q-transform.
+        if Qmin >= Qmax:
+            self.showdialogWarning(
+                "Invalid Q range: Qmin must be smaller than Qmax.",
+                "Please check the Q-scan settings and try again."
+            )
+            return
+
         set_vmax = False
         if self.checkBox_8.isChecked():
             set_vmax = True
