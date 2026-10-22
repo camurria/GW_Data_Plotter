@@ -1612,6 +1612,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.tips_for_plotting(self.glitches_dict[self.glitch], 'glitch')
 
         do_whiten,do_freq_sel,fmin,fmax,do_zoom,tmin,tmax, label_w, bp_label = self.check_common_plot_options()
+        # MB: Validate frequency range before strain plotting.
+        if do_freq_sel and fmin >= fmax:
+            self.showdialogWarning(
+                "Invalid frequency range: fmin must be smaller than fmax.",
+                "Please check the frequency settings and try again."
+            )
+            return
         if (self.GPS_end - self.GPS_start)<2 and do_whiten:
             warn_text = f"At least 2 seconds of data are required to whiten them."
             warn_details = f"Use the previous tab to download a segment of data at least 2 seconds long or disable the whiten option in the Plot settings."
@@ -1718,7 +1725,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             vmax = self.spinBox_5.value()
 
         do_whiten,do_freq_sel,fmin,fmax,do_zoom,tmin,tmax, label_w, bp_label  = self.check_common_plot_options()
-
+        # MB: Validate frequency range before Q-scan plotting.
+        if do_freq_sel and fmin >= fmax:
+            self.showdialogWarning(
+                "Invalid frequency range: fmin must be smaller than fmax.",
+                "Please check the frequency settings and try again."
+            )
+            return
         start_segment = self.GPS_start
         end_segment = self.GPS_end
         if do_zoom:
